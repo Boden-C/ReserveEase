@@ -1,19 +1,23 @@
 # app.py
-from flask import Flask, jsonify, request
+from flask import Flask
 from flask_cors import CORS
+import firebase_admin
+from firebase_admin import credentials
 
+from routes.authenticate import authentication_bp
+
+# Initialize Flask app
 app = Flask(__name__)
+app.config.from_object('config.Config')  
 CORS(app)
 
-# Error handling
-@app.errorhandler(404)
-def not_found(error):
-    return jsonify({"error": "Resource not found"}), 404
+# Initialize Firebase Admin
+cred = credentials.Certificate("./firebase-adminsdk.json.local")
+firebase_admin.initialize_app(cred)
 
-@app.errorhandler(500)
-def server_error(error):
-    return jsonify({"error": "An internal error occurred"}), 500
+# Register blueprints with a URL prefix
+app.register_blueprint(authentication_bp, url_prefix='/api')
 
 # Run the app
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run()
