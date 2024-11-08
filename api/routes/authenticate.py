@@ -1,6 +1,6 @@
 # routes/authenticate.py
 from flask import Blueprint, jsonify, request
-from api.wrappers import verify_token
+from wrappers import verify_token
 
 authentication_bp = Blueprint('authentication_bp', __name__)
 
