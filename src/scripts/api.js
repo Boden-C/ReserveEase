@@ -11,9 +11,9 @@ import { request } from "./api"
  * @throws {Error} If there is an issue with the request.
  * Adds a reservation
  * @param {number} id - The parking ID
- * @param {Date} start - The start date and time.
- * @param {Date} end - The end date and time.
+ * @param {string} time_block - The start specific time block for the reservation
  */
+
 export async function request(url, options = {}, auth = false) {
     url = `${import.meta.env.VITE_API_URL}${url}`;
     if (auth) {
@@ -23,11 +23,10 @@ export async function request(url, options = {}, auth = false) {
     }
 }
 
-export function addReservation(id, start, end) {
+export function addReservation(id, time_block) {
     const data = {
-        id: id,
-        start: start.toISOString(), // Convert Date to ISO string
-        end: end.toISOString()       // Convert Date to ISO string
+        charger_id: id,
+        time_block: time_block
     };
 
     return request('/api/reservation/add', {
@@ -39,15 +38,15 @@ export function addReservation(id, start, end) {
     }, true); // `true` if authentication is required
 }
 
-export function deleteReservation(id, start, end) {
+
+export function deleteReservation(id, time_block) {
     const data = {
-        id: id,
-        start: start.toISOString(), // Convert Date to ISO string
-        end: end.toISOString()       // Convert Date to ISO string
+        charger_id: id,
+        time_block: time_block
     };
 
     return request('/api/reservation/delete', {
-        method: 'DELETE',
+        method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
