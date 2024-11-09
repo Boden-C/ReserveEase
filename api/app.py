@@ -10,7 +10,7 @@ from routes.reservations import reservations_bp
 # Initialize Flask app
 app = Flask(__name__)
 app.config.from_object('config.Config')  
-CORS(app)
+CORS(app, origins=["http://localhost:5173"])
 
 # Initialize Firebase Admin
 cred = credentials.Certificate("./firebase-adminsdk.json.local")
