@@ -14,8 +14,9 @@ export const AddReservation = () => {
         try {
             const response = await addReservation(Number(chargerId), timeBlock);
             const result = await response.json();
-            if (response.ok) {
-                setMessage('Reservation added successfully!');
+            if (response.status === 'success') {
+                console.log(response.message);
+                navigate('/dashboard');
             } else {
                 setMessage(`Error: ${result.message}`);
             }
@@ -62,11 +63,7 @@ export const AddReservation = () => {
                         Add Reservation
                     </button>
                 </form>
-                {message && (
-                    <p className={`mt-4 text-center font-medium ${response.ok ? 'text-green-500' : 'text-red-500'}`}>
-                        {message}
-                    </p>
-                )}
+                {message && <p className={`mt-4 text-center font-medium text-red-500`}>{message}</p>}
             </div>
         </div>
     );
@@ -84,12 +81,12 @@ export const DeleteReservation = () => {
         try {
             const response = await deleteReservation(Number(chargerId), timeBlock);
             const result = await response.json();
-            if (response.ok) {
-                setMessage('Reservation removed successfully!');
+            if (response.status === 'success') {
+                console.log(response.message);
+                navigate('/dashboard');
             } else {
                 setMessage(`Error: ${result.message}`);
             }
-            navigate('/dashboard');
         } catch (error) {
             setMessage(`Error: ${error.message}`);
         }
@@ -133,11 +130,7 @@ export const DeleteReservation = () => {
                         Delete Reservation
                     </button>
                 </form>
-                {message && (
-                    <p className={`mt-4 text-center font-medium ${response.ok ? 'text-green-500' : 'text-red-500'}`}>
-                        {message}
-                    </p>
-                )}
+                {message && <p className={`mt-4 text-center font-medium text-red-500`}>{message}</p>}
             </div>
         </div>
     );
