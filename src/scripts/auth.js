@@ -6,7 +6,7 @@ import { auth } from "./firebaseConfig.js";
  * Signs up a new user with the given email and password.
  * @param {string} email - The email for the new user.
  * @param {string} password - The password for the new user.
- * @returns {Promise<object>} The new user's credentials.
+ * @returns {Promise<import("firebase/auth").UserCredential} The new user's credentials.
  * @throws {Error} If there is an error during sign-up.
  */
 export async function signup(email, password) {
