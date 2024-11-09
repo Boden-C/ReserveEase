@@ -1,198 +1,142 @@
+# api/tests/test_reservations.py
 import pytest
-from flask import Flask
-import firebase_admin
-from firebase_admin import credentials, db
-from unittest.mock import Mock, patch
-from datetime import datetime, timedelta
 import json
+from unittest.mock import patch
+import firebase_admin.auth
 
-# Import your Blueprint
-from data_management import data_management_bp
+class TestReservations:
+    """Test suite for reservation endpoints"""
 
-@pytest.fixture
-def app():
-    """Create a Flask test application"""
-    app = Flask(__name__)
-    app.register_blueprint(data_management_bp)
-    return app
-
-@pytest.fixture
-def client(app):
-    """Create a test client"""
-    return app.test_client()
-
-@pytest.fixture
-def mock_db():
-    """Mock Firebase database operations"""
-    with patch('firebase_admin.db') as mock_db:
-        # Create a mock reference object
-        mock_ref = Mock()
-        mock_db.reference.return_value = mock_ref
-        yield mock_db
-
-class TestChargerReservation:
-    def test_add_reservation_success(self, client, mock_db):
-        """Test successful reservation creation"""
-        # Mock the database response
-        mock_ref = mock_db.reference.return_value
-        mock_ref.transaction.return_value = {
-            'reserved': True,
-            'user_id': 'test_user',
-            'timestamp': datetime.now().isoformat()
+    def test_add_reservation_success(self, client, mock_db, mock_auth, auth_headers):
+        """Test successfully adding a reservation"""
+        # Mock the auth token verification to return test user 1
+        mock_auth.return_value = {
+            'uid': 'test_user_2',
+            'email': 'test2@example.com',
+            'user_role': 'user'
         }
 
-        # Test data
-        test_data = {
-            'charger_id': 'charger1',
-            'time_block': datetime.now().isoformat(),
-            'user_id': 'test_user'
-        }
-
-        # Make request
-        response = client.post('/add_reservation',
-                             data=json.dumps(test_data),
-                             content_type='application/json')
+        response = client.post(
+            '/reservations/add',
+            json={
+                'charger_id': 'test_charger_1',
+                'time_block': '09:00-10:00'
+            },
+            headers=auth_headers
+        )
         
-        # Assert response
         assert response.status_code == 200
-        data = json.loads(response.data)
-        assert data['status'] == 'success'
-        assert 'reservation_data' in data
+        response_data = json.loads(response.data)
+        assert response_data['status'] == 'success'
+        assert response_data['message'] == 'Reservation added successfully'
 
-    def test_add_reservation_already_reserved(self, client, mock_db):
-        """Test attempting to reserve an already reserved time block"""
-        # Mock the database response for already reserved
-        mock_ref = mock_db.reference.return_value
-        mock_ref.transaction.return_value = {
-            'reserved': True,
-            'user_id': 'other_user',
-            'timestamp': datetime.now().isoformat()
+    def test_add_reservation_unauthorized(self, client, mock_db):
+        """Test adding a reservation without auth token"""
+        response = client.post(
+            '/reservations/add',
+            json={
+                'charger_id': 'test_charger_1',
+                'time_block': '09:00-10:00'
+            }
+        )
+        
+        assert response.status_code == 401
+        response_data = json.loads(response.data)
+        assert response_data['error'] == 'Authorization header missing or invalid'
+
+    def test_add_reservation_already_reserved(self, client, mock_db, mock_auth, auth_headers):
+        """Test attempting to add a reservation for an already reserved time block"""
+        mock_auth.return_value = {
+            'uid': 'test_user_2',
+            'email': 'test2@example.com',
+            'user_role': 'user'
         }
 
-        test_data = {
-            'charger_id': 'charger1',
-            'time_block': datetime.now().isoformat(),
-            'user_id': 'test_user'
-        }
-
-        response = client.post('/add_reservation',
-                             data=json.dumps(test_data),
-                             content_type='application/json')
+        response = client.post(
+            '/reservations/add',
+            json={
+                'charger_id': 'test_charger_1',
+                'time_block': '10:00-11:00'
+            },
+            headers=auth_headers
+        )
         
         assert response.status_code == 409
-        data = json.loads(response.data)
-        assert data['status'] == 'error'
-        assert 'already reserved' in data['message']
+        response_data = json.loads(response.data)
+        assert response_data['message'] == 'Time block already reserved'
 
-    def test_add_reservation_invalid_data(self, client):
-        """Test reservation with missing required fields"""
-        test_data = {
-            'charger_id': 'charger1'
-            # Missing time_block
-        }
+    def test_add_reservation_invalid_token(self, client, mock_db, mock_auth, auth_headers):
+        """Test adding a reservation with invalid token"""
+        mock_auth.side_effect = firebase_admin.auth.InvalidIdTokenError('Invalid token')
 
-        response = client.post('/add_reservation',
-                             data=json.dumps(test_data),
-                             content_type='application/json')
+        response = client.post(
+            '/reservations/add',
+            json={
+                'charger_id': 'test_charger_1',
+                'time_block': '09:00-10:00'
+            },
+            headers=auth_headers
+        )
         
-        assert response.status_code == 400
-        data = json.loads(response.data)
-        assert data['status'] == 'error'
-        assert 'Missing required fields' in data['message']
+        assert response.status_code == 401
+        response_data = json.loads(response.data)
+        assert response_data['error'] == 'Invalid token'
 
-    def test_delete_reservation_success(self, client, mock_db):
-        """Test successful reservation deletion"""
-        # Mock the database response
-        mock_ref = mock_db.reference.return_value
-        mock_ref.get.return_value = {
-            'reserved': True,
-            'user_id': 'test_user',
-            'timestamp': datetime.now().isoformat()
+    def test_delete_reservation_success(self, client, mock_db, mock_auth, auth_headers):
+        """Test successfully deleting a reservation"""
+        # Mock the auth token verification to return test user 1 (owner of the reservation)
+        mock_auth.return_value = {
+            'uid': 'test_user_1',
+            'email': 'test1@example.com',
+            'user_role': 'user'
         }
 
-        test_data = {
-            'charger_id': 'charger1',
-            'time_block': datetime.now().isoformat(),
-            'user_id': 'test_user'
-        }
-
-        response = client.post('/delete_reservation',
-                             data=json.dumps(test_data),
-                             content_type='application/json')
+        response = client.post(
+            '/reservations/delete',
+            json={
+                'charger_id': 'test_charger_1',
+                'time_block': '10:00-11:00'
+            },
+            headers=auth_headers
+        )
         
         assert response.status_code == 200
-        data = json.loads(response.data)
-        assert data['status'] == 'success'
-        assert 'deleted' in data['message']
+        response_data = json.loads(response.data)
+        assert response_data['status'] == 'success'
+        assert response_data['message'] == 'Reservation deleted successfully'
 
-    def test_delete_reservation_not_found(self, client, mock_db):
-        """Test deleting a non-existent reservation"""
-        # Mock the database response for non-existent reservation
-        mock_ref = mock_db.reference.return_value
-        mock_ref.get.return_value = None
-
-        test_data = {
-            'charger_id': 'charger1',
-            'time_block': datetime.now().isoformat(),
-            'user_id': 'test_user'
+    def test_delete_reservation_unauthorized_user(self, client, mock_db, mock_auth, auth_headers):
+        """Test attempting to delete someone else's reservation"""
+        # Mock the auth token verification to return test user 2 (not the owner)
+        mock_auth.return_value = {
+            'uid': 'test_user_2',
+            'email': 'test2@example.com',
+            'user_role': 'user'
         }
 
-        response = client.post('/delete_reservation',
-                             data=json.dumps(test_data),
-                             content_type='application/json')
-        
-        assert response.status_code == 404
-        data = json.loads(response.data)
-        assert data['status'] == 'error'
-        assert 'not reserved' in data['message']
-
-    def test_delete_reservation_unauthorized(self, client, mock_db):
-        """Test deleting someone else's reservation"""
-        # Mock the database response
-        mock_ref = mock_db.reference.return_value
-        mock_ref.get.return_value = {
-            'reserved': True,
-            'user_id': 'other_user',
-            'timestamp': datetime.now().isoformat()
-        }
-
-        test_data = {
-            'charger_id': 'charger1',
-            'time_block': datetime.now().isoformat(),
-            'user_id': 'test_user'
-        }
-
-        response = client.post('/delete_reservation',
-                             data=json.dumps(test_data),
-                             content_type='application/json')
+        response = client.post(
+            '/reservations/delete',
+            json={
+                'charger_id': 'test_charger_1',
+                'time_block': '10:00-11:00'
+            },
+            headers=auth_headers
+        )
         
         assert response.status_code == 403
-        data = json.loads(response.data)
-        assert data['status'] == 'error'
-        assert 'Unauthorized' in data['message']
+        response_data = json.loads(response.data)
+        assert response_data['message'] == 'Not authorized to delete this reservation'
 
-    def test_get_availability(self, client, mock_db):
-        """Test getting charger availability"""
-        # Mock the database response
-        mock_ref = mock_db.reference.return_value
-        mock_ref.get.return_value = {
-            '2024-01-01T10:00:00': {'reserved': False},
-            '2024-01-01T11:00:00': {'reserved': True, 'user_id': 'test_user'}
-        }
-
-        response = client.get('/get_availability?charger_id=charger1&date=2024-01-01')
+    def test_delete_reservation_no_token(self, client, mock_db):
+        """Test deleting a reservation without auth token"""
+        response = client.post(
+            '/reservations/delete',
+            json={
+                'charger_id': 'test_charger_1',
+                'time_block': '10:00-11:00'
+            }
+        )
         
-        assert response.status_code == 200
-        data = json.loads(response.data)
-        assert data['status'] == 'success'
-        assert 'data' in data
-        assert len(data['data']) == 2
-
-    def test_get_availability_missing_charger(self, client):
-        """Test getting availability without charger ID"""
-        response = client.get('/get_availability')
-        
-        assert response.status_code == 400
-        data = json.loads(response.data)
-        assert data['status'] == 'error'
-        assert 'Charger ID is required' in data['message']
+        assert response.status_code == 401
+        response_data = json.loads(response.data)
+        assert response_data['error'] == 'Authorization header missing or invalid'

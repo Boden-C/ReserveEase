@@ -1,4 +1,4 @@
-# api/routes/reservationAandD.py
+# api/routes/reservations.py
 from flask import Blueprint, request, jsonify
 from firebase_admin import db
 import sys
@@ -7,9 +7,9 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from wrappers import verify_token  # Using absolute import
 
 # Define the Blueprint - keeping your original name
-data_management_bp = Blueprint('data_management', __name__)
+reservations_bp = Blueprint('reservations', __name__)
 
-@data_management_bp.route('/addReservation', methods=['POST'])
+@reservations_bp.route('/reservations/add', methods=['POST'])
 @verify_token()
 def add_reservation():
     try:
@@ -53,7 +53,7 @@ def add_reservation():
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
-@data_management_bp.route('/deleteReservation', methods=['POST'])
+@reservations_bp.route('/reservations/delete', methods=['POST'])
 @verify_token()
 def delete_reservation():
     try:

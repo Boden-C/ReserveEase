@@ -5,6 +5,7 @@ import firebase_admin
 from firebase_admin import credentials
 
 from routes.authenticate import authentication_bp
+from routes.reservations import reservations_bp
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -17,6 +18,7 @@ firebase_admin.initialize_app(cred)
 
 # Register blueprints with a URL prefix
 app.register_blueprint(authentication_bp, url_prefix='/api')
+app.register_blueprint(reservations_bp, url_prefix='/api')
 
 # Run the app
 if __name__ == '__main__':
