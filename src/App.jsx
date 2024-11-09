@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
-import LandingPage from './pages/LandingPage';
+import DashboardPage from './pages/DashboardPage';
 import { SignIn, SignUp } from './pages/AuthenticationPages';
 import { AddReservation, DeleteReservation } from './pages/ReservationPage';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -20,7 +20,7 @@ function App() {
                         path="/dashboard"
                         element={
                             <ProtectedRoute>
-                                <LandingPage />
+                                <DashboardPage />
                             </ProtectedRoute>
                         }
                     />
