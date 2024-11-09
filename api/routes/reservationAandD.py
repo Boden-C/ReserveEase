@@ -9,7 +9,7 @@ from wrappers import verify_token  # Using absolute import
 # Define the Blueprint - keeping your original name
 data_management_bp = Blueprint('data_management', __name__)
 
-@data_management_bp.route('/add_reservation', methods=['POST'])
+@data_management_bp.route('/addReservation', methods=['POST'])
 @verify_token()
 def add_reservation():
     try:
@@ -53,7 +53,7 @@ def add_reservation():
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
-@data_management_bp.route('/delete_reservation', methods=['POST'])
+@data_management_bp.route('/deleteReservation', methods=['POST'])
 @verify_token()
 def delete_reservation():
     try:
