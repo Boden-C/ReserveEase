@@ -1,6 +1,6 @@
-"use strict";
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, getIdToken } from "firebase/auth";
-import { auth } from "./firebaseConfig.js";
+'use strict';
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, getIdToken } from 'firebase/auth';
+import { auth } from './firebaseConfig.js';
 
 /**
  * Signs up a new user with the given email and password.
@@ -28,6 +28,7 @@ export async function signin(email, password) {
     return idToken;
 }
 
+window.signout = signout; // TODO remove
 /**
  * Signs out the current user.
  * @returns {Promise<void>}
@@ -35,6 +36,20 @@ export async function signin(email, password) {
  */
 export async function signout() {
     await signOut(auth);
+}
+
+window.validateIdToken = validateIdToken; // TODO remove
+/**
+ * Authenticates the user and returns the Firebase ID token.
+ * @returns {Promise<string>} The Firebase ID token.
+ * @throws {Error} If invalid
+ */
+export async function validateIdToken() {
+    const user = auth.currentUser;
+    if (!user) throw new Error('User not logged in');
+
+    const idToken = await getIdToken(user);
+    return idToken;
 }
 
 /**
@@ -45,17 +60,13 @@ export async function signout() {
  * @throws {Error} If there is an issue retrieving the ID token.
  */
 export async function fetchWithAuthentication(url, options = {}) {
-    // Attempt to get the current user's ID token
-    const user = auth.currentUser;
-    if (!user) throw new Error("User not logged in");
-
-    const idToken = await getIdToken(user);
+    const idToken = await validateIdToken();
 
     // Set up headers and add the Authorization header with the token
     const headers = {
         ...options.headers,
-        "Authorization": `Bearer ${idToken}`,
-        "Content-Type": "application/json",
+        Authorization: `Bearer ${idToken}`,
+        'Content-Type': 'application/json',
     };
 
     // Make the fetch request with the modified headers
@@ -63,5 +74,4 @@ export async function fetchWithAuthentication(url, options = {}) {
         ...options,
         headers: headers,
     });
-
 }

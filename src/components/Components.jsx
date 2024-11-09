@@ -1,6 +1,6 @@
 /* eslint-disable react/prop-types */
 
-export const Button = ({ children, type = "button", ...props }) => (
+export const Button = ({ children, type = 'button', ...props }) => (
     <button
         type={type}
         className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-200 ease-in-out"
@@ -10,7 +10,7 @@ export const Button = ({ children, type = "button", ...props }) => (
     </button>
 );
 
-export const Input = ({ label, type = "text", ...props }) => (
+export const Input = ({ label, type = 'text', ...props }) => (
     <div className="mb-4">
         <label className="block text-gray-700 text-sm font-bold mb-2">{label}</label>
         <input
