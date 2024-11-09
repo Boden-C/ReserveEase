@@ -1,5 +1,5 @@
 "use strict";
-import { createUserWithEmailAndPassword,signInWithEmailAndPassword,signOut,getIdToken } from "firebase/auth";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, getIdToken } from "firebase/auth";
 import { auth } from "./firebaseConfig.js";
 
 /**
@@ -10,13 +10,8 @@ import { auth } from "./firebaseConfig.js";
  * @throws {Error} If there is an error during sign-up.
  */
 export async function signup(email, password) {
-    try {
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        return userCredential;
-    } catch (error) {
-        console.error("Error signing up:", error);
-        throw error;
-    }
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    return userCredential;
 }
 
 /**
@@ -27,15 +22,10 @@ export async function signup(email, password) {
  * @throws {Error} If an error occurs while signing in.
  */
 export async function signin(email, password) {
-    try {
-        const userCredential = await signInWithEmailAndPassword(auth, email, password);
-        const user = userCredential.user;
-        const idToken = await user.getIdToken();
-        return idToken;
-    } catch (error) {
-        console.error("Error signing in:", error);
-        throw error;
-    }
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
+    const idToken = await user.getIdToken();
+    return idToken;
 }
 
 /**
@@ -44,12 +34,7 @@ export async function signin(email, password) {
  * @throws {Error} If an error occurs while signing out.
  */
 export async function signout() {
-    try {
-        await signOut(auth);
-    } catch (error) {
-        console.error("Error signing out:", error);
-        throw error;
-    }
+    await signOut(auth);
 }
 
 /**
@@ -78,5 +63,5 @@ export async function fetchWithAuthentication(url, options = {}) {
         ...options,
         headers: headers,
     });
-    
+
 }

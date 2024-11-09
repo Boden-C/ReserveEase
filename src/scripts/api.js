@@ -1,6 +1,5 @@
 "use strict";
 import { fetchWithAuthentication } from "./auth.js";
-import { request } from "./api"
 
 /**
  * Makes a request to the API.
@@ -9,7 +8,6 @@ import { request } from "./api"
  * @param {boolean} auth - Whether to include authentication headers.
  * @throws {Error} If there is an issue with the request.
  */
-
 export async function request(url, options = {}, auth = false) {
     url = `${import.meta.env.VITE_API_URL}${url}`;
     if (auth) {
@@ -24,7 +22,6 @@ export async function request(url, options = {}, auth = false) {
 * @param {number} id - The parking ID
 * @param {string} time_block - The start specific time block for the reservation
 */
-
 export function addReservation(id, time_block) {
     const data = {
         charger_id: id,
@@ -45,7 +42,6 @@ export function addReservation(id, time_block) {
 * @param {number} id - The parking ID
 * @param {string} time_block - The start specific time block for the reservation
 */
-
 export function deleteReservation(id, time_block) {
     const data = {
         charger_id: id,
