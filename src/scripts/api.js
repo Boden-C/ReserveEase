@@ -30,7 +30,7 @@ export function addReservation(id, time_block) {
     };
 
     return request(
-        '/api/reservation/add',
+        '/reservation/add',
         {
             method: 'POST',
             headers: {
@@ -54,7 +54,7 @@ export function deleteReservation(id, time_block) {
     };
 
     return request(
-        '/api/reservation/delete',
+        '/reservation/delete',
         {
             method: 'POST',
             headers: {
