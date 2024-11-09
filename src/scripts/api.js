@@ -7,7 +7,6 @@ import { request } from "./api"
  * @param {string} url - The endpoint URL.
  * @param {object} options - Fetch options.
  * @param {boolean} auth - Whether to include authentication headers.
- * @returns {Promise<Response>} The fetch response.
  * @throws {Error} If there is an issue with the request.
  */
 
