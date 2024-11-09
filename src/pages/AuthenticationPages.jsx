@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { Button, Input, AuthCard } from '@/components/Components';
 import { signin, signup } from '@/scripts/auth';
 import { getUserFriendlyErrorMessage } from '@/scripts/utils';
+import { useAuth } from '../components/AuthContext'; // Add this import
 
 // Sign-up page
 const SignUp = () => {
@@ -71,8 +72,17 @@ const SignUp = () => {
 const SignIn = () => {
     const navigate = useNavigate();
     const location = useLocation();
+    const { user } = useAuth();
 
-    // React adaptive hooks
+    // Add this effect to handle automatic redirects when already authenticated
+    useEffect(() => {
+        if (user) {
+            const from = location.state?.from?.pathname || '/dashboard';
+            navigate(from, { replace: true });
+        }
+    }, [user, navigate, location]);
+
+    // Your existing state setup
     const [formData, setFormData] = useState({
         email: '',
         password: '',
@@ -80,24 +90,21 @@ const SignIn = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
 
-    // On effect functions
     const handleSubmit = async (e) => {
-        // Get the intended destination, fallback to dashboard
-        const from = location.state?.from?.pathname || '/dashboard';
-
         e.preventDefault();
         setErrorMessage('');
         setIsLoading(true);
 
         try {
             await signin(formData.email, formData.password);
-            navigate(from, { replace: true });
+            // No need to navigate here - the useEffect above will handle it
+            // when the auth state changes
         } catch (error) {
             setErrorMessage(getUserFriendlyErrorMessage(error));
-        } finally {
             setIsLoading(false);
         }
     };
+
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData((prev) => ({
