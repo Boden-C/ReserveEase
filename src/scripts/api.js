@@ -9,9 +9,6 @@ import { request } from "./api"
  * @param {boolean} auth - Whether to include authentication headers.
  * @returns {Promise<Response>} The fetch response.
  * @throws {Error} If there is an issue with the request.
- * Adds a reservation
- * @param {number} id - The parking ID
- * @param {string} time_block - The start specific time block for the reservation
  */
 
 export async function request(url, options = {}, auth = false) {
@@ -22,6 +19,12 @@ export async function request(url, options = {}, auth = false) {
         return fetch(url, options);
     }
 }
+
+/** 
+* Adds a reservation
+* @param {number} id - The parking ID
+* @param {string} time_block - The start specific time block for the reservation
+*/
 
 export function addReservation(id, time_block) {
     const data = {
@@ -38,6 +41,11 @@ export function addReservation(id, time_block) {
     }, true); // `true` if authentication is required
 }
 
+/** 
+* Deletes a reservation
+* @param {number} id - The parking ID
+* @param {string} time_block - The start specific time block for the reservation
+*/
 
 export function deleteReservation(id, time_block) {
     const data = {
