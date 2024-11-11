@@ -21,9 +21,9 @@ export function getUserFriendlyErrorMessage(error) {
 
     // Check if error has a 'code' property and is listed in the hashmap
     if (error && error.code) {
-        return errorMap[error.code] || `An error occurred: ${error.message || error.code}`;
+        return errorMap[error.code] || `${error.message || error.code}`;
     }
 
     // If the error does not match any Firebase error code, return a default message
-    return `An error occurred: ${error.message || error}`;
+    return `${error.message || error}`;
 }

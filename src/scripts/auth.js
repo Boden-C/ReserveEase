@@ -38,40 +38,16 @@ export async function signout() {
     await signOut(auth);
 }
 
-window.validateIdToken = validateIdToken; // TODO remove
+window.validateUser = validateUser; // TODO remove
 /**
  * Authenticates the user and returns the Firebase ID token.
  * @returns {Promise<string>} The Firebase ID token.
  * @throws {Error} If invalid
  */
-export async function validateIdToken() {
+export async function validateUser() {
     const user = auth.currentUser;
     if (!user) throw new Error('User not logged in');
 
     const idToken = await getIdToken(user);
     return idToken;
-}
-
-/**
- * Wrapper function to add Firebase ID token to authenticated requests.
- * @param {string} url - The endpoint URL.
- * @param {object} options - Fetch options (e.g., method, headers).
- * @returns {Promise<Response>} The fetch response.
- * @throws {Error} If there is an issue retrieving the ID token.
- */
-export async function fetchWithAuthentication(url, options = {}) {
-    const idToken = await validateIdToken();
-
-    // Set up headers and add the Authorization header with the token
-    const headers = {
-        ...options.headers,
-        Authorization: `Bearer ${idToken}`,
-        'Content-Type': 'application/json',
-    };
-
-    // Make the fetch request with the modified headers
-    return await fetch(url, {
-        ...options,
-        headers: headers,
-    });
 }

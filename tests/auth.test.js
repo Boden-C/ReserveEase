@@ -1,6 +1,6 @@
 // tests/auth.test.js
 import { describe, it, expect } from 'vitest';
-import { signup, signin, signout } from '../scripts/auth.js';
+import { signup, signin, signout } from '../src/scripts/auth.js';
 
 const TEST_EMAIL = 'testuser@example.com';
 const TEST_PASSWORD = 'testpassword';

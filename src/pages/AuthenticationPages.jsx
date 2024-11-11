@@ -3,7 +3,7 @@ import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { Button, Input, AuthCard } from '@/components/Components';
 import { signin, signup } from '@/scripts/auth';
 import { getUserFriendlyErrorMessage } from '@/scripts/utils';
-import { useAuth } from '../components/AuthContext'; // Add this import
+import { useAuth } from '../components/AuthContext';
 
 // Sign-up page
 const SignUp = () => {
