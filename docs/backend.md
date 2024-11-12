@@ -2,7 +2,8 @@
 
 ## api/exceptions.py
 `api.exceptions.__init__(self, message: str, code: int)`
-    Custom exception for client-side errors.
+```
+Custom exception for client-side errors.
     This should be the only error explicitly raised in the API routes.
     
     Args:
@@ -17,10 +18,12 @@
         409 Conflict: Request conflicts with server state
         410 Gone: Resource is no longer available.
         422 Unprocessable Entity: Valid syntax but semantic issues
+```
 
 ## api/wrappers.py
 `api.wrappers.verify_token(f: Callable) -> Callable`
-    Decorator that verifies Firebase JWT tokens from the Authorization header.
+```
+Decorator that verifies Firebase JWT tokens from the Authorization header.
     Sets both the full decoded token and user_id in Flask's g object.
     
     Sets:
@@ -38,13 +41,17 @@
             user_id = g.user_id  # access just the ID
             user_data = g.user   # access full token data
             return {'message': f'Hello {user_id}'}
+```
 
 `api.wrappers.decorated() -> Union[Tuple[Dict[str, str], int], Any]`
-    
+```
+
+```
 
 ## api/database/reservations.py
 `api.database.reservations.create_reservation(user_id: str, space_id: str, start_timestamp: datetime, end_timestamp: datetime) -> str`
-    Create a new reservation in Firestore.
+```
+Create a new reservation in Firestore.
     
     Args:
         user_id (str): ID of the user making the reservation
@@ -54,15 +61,19 @@
     
     Returns:
         str: Reservation ID
+```
 
 `api.database.reservations.delete_reservation(reservation_id: str) -> None`
-    Delete a reservation from Firestore.
+```
+Delete a reservation from Firestore.
     
     Args:
         reservation_id (str): ID of the reservation to delete
+```
 
 `api.database.reservations.get_reservations(reservation_id: Optional[str], user_id: Optional[str], space_id: Optional[str], start_timestamp: Optional[str], end_timestamp: Optional[str]) -> List[Reservation]`
-    Fetches reservations based on provided filters.
+```
+Fetches reservations based on provided filters.
     
     Args:
         reservation_id (str, optional): Unique ID of the reservation.
@@ -76,9 +87,11 @@
     
     Raises:
         ClientError: If timestamp format is invalid or query execution fails.
+```
 
 `api.database.reservations.schedule(user_id: str, space_id: str, start_timestamp: str, end_timestamp: str) -> str`
-    Validates reservation times and creates a new reservation in Firestore.
+```
+Validates reservation times and creates a new reservation in Firestore.
     
     Args:
         user_id (str): ID of the user making the reservation
@@ -88,14 +101,18 @@
     
     Returns:
         str: Reservation ID
+```
 
 ## api/routes/authenticate.py
 `api.routes.authenticate.authenticate()`
-    Route to check if user is valid.
+```
+Route to check if user is valid.
+```
 
 ## api/routes/reservations.py
 `api.routes.reservations.create_reservation()`
-    Create a new reservation using authenticated user's ID
+```
+Create a new reservation using authenticated user's ID
     ---
     post:
         summary: Create a new reservation
@@ -148,9 +165,11 @@
                             properties:
                                 message:
                                     type: string
+```
 
 `api.routes.reservations.delete_reservation(reservation_id)`
-    Delete an existing reservation by ID, if it belongs to the authenticated user
+```
+Delete an existing reservation by ID, if it belongs to the authenticated user
     ---
     delete:
         summary: Delete a reservation
@@ -168,9 +187,11 @@
             description: Unauthorized action
         404:
             description: Reservation not found
+```
 
 `api.routes.reservations.get_user_reservations()`
-    Get all reservations for the authenticated user
+```
+Get all reservations for the authenticated user
     ---
     get:
         summary: Get user's reservations
@@ -182,9 +203,11 @@
                     schema:
                         type: array
                         items: Reservation
+```
 
 `api.routes.reservations.get_reservations_route()`
-    Get reservations based on filters
+```
+Get reservations based on filters
     ---
     get:
         summary: Get reservations based on optional filters
@@ -228,42 +251,67 @@
                             properties:
                                 message:
                                     type: string
+```
 
 ## api/tests/conftest.py
 `api.tests.conftest.app()`
-    Create and configure a test Flask application
+```
+Create and configure a test Flask application
+```
 
 `api.tests.conftest.client(app)`
-    Create a test client for the app
+```
+Create a test client for the app
+```
 
 `api.tests.conftest.mock_db()`
-    Fixture to mock Firebase database with test data
+```
+Fixture to mock Firebase database with test data
+```
 
 `api.tests.conftest.mock_auth()`
-    Fixture to mock Firebase authentication
+```
+Fixture to mock Firebase authentication
+```
 
 `api.tests.conftest.auth_headers()`
-    Fixture to provide authentication headers
+```
+Fixture to provide authentication headers
+```
 
 ## api/tests/test_reservations.py
 `api.tests.test_reservations.test_add_reservation_success(self, client, mock_db, mock_auth, auth_headers)`
-    Test successfully adding a reservation
+```
+Test successfully adding a reservation
+```
 
 `api.tests.test_reservations.test_add_reservation_unauthorized(self, client, mock_db)`
-    Test adding a reservation without auth token
+```
+Test adding a reservation without auth token
+```
 
 `api.tests.test_reservations.test_add_reservation_already_reserved(self, client, mock_db, mock_auth, auth_headers)`
-    Test attempting to add a reservation for an already reserved time block
+```
+Test attempting to add a reservation for an already reserved time block
+```
 
 `api.tests.test_reservations.test_add_reservation_invalid_token(self, client, mock_db, mock_auth, auth_headers)`
-    Test adding a reservation with invalid token
+```
+Test adding a reservation with invalid token
+```
 
 `api.tests.test_reservations.test_delete_reservation_success(self, client, mock_db, mock_auth, auth_headers)`
-    Test successfully deleting a reservation
+```
+Test successfully deleting a reservation
+```
 
 `api.tests.test_reservations.test_delete_reservation_unauthorized_user(self, client, mock_db, mock_auth, auth_headers)`
-    Test attempting to delete someone else's reservation
+```
+Test attempting to delete someone else's reservation
+```
 
 `api.tests.test_reservations.test_delete_reservation_no_token(self, client, mock_db)`
-    Test deleting a reservation without auth token
+```
+Test deleting a reservation without auth token
+```
 

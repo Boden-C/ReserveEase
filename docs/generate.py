@@ -91,7 +91,7 @@ def extract_functions_from_python(file_path: str) -> List[str]:
 
             # Build the final format
             module_path = file_path.replace("/", ".").replace("\\", ".").replace(".py", "")
-            function_info = f"`{module_path}.{signature}`\n    {formatted_docstring}"
+            function_info = f"`{module_path}.{signature}`\n{"```\n"+formatted_docstring+"\n```"}"
             functions_info.append(function_info)
 
     return functions_info
