@@ -1,8 +1,10 @@
 # app.py
-from flask import Flask
+from flask import Flask, jsonify
 from flask_cors import CORS
 import firebase_admin
-from firebase_admin import credentials
+from firebase_admin import credentials, firestore
+
+from database.reservations import schedule
 
 from routes.authenticate import authentication_bp
 from routes.reservations import reservations_bp

@@ -1,84 +1,59 @@
 #decorators.py
-from flask import request, jsonify
+from flask import request, g
+from typing import Callable, Dict, Tuple, Union, Any
 from functools import wraps
 from firebase_admin import auth
 
-def verify_token(roles=None):
+def verify_token(f: Callable) -> Callable:
     """
-    Decorator to verify Firebase ID token and check for required roles.
-    Args:
-        roles: List of roles (claims) that satisfy the access condition.
+    Decorator that verifies Firebase JWT tokens from the Authorization header.
+    Sets both the full decoded token and user_id in Flask's g object.
+    
+    Sets:
+        g.user (Dict): Full decoded token containing user data
+        g.user_id (str): Firebase user ID (UID)
     
     Returns:
-        Function decorator that handles authentication and authorization.
-        
-    Status Codes:
-        401 - Missing token or invalid authentication
-        403 - Valid authentication but insufficient permissions
+        If token is valid: Original route response
+        If token is invalid: Tuple[Dict[str, str], int] with error message and 401 status
+    
+    Usage:
+        @app.route('/protected')
+        @verify_token
+        def protected_route():
+            user_id = g.user_id  # access just the ID
+            user_data = g.user   # access full token data
+            return {'message': f'Hello {user_id}'}
     """
-    def decorator(f):
-        @wraps(f)
-        def wrapper(*args, **kwargs):
-            # Check if Authorization header exists
-            auth_header = request.headers.get("Authorization")
-            if not auth_header:
-                return jsonify({
-                    "error": "Authorization header missing or invalid",
-                    "message": "Authentication required"
-                }), 401
+    @wraps(f)
+    def decorated(*args, **kwargs) -> Union[Tuple[Dict[str, str], int], Any]:
+        token = None
+        auth_header = request.headers.get('Authorization')
 
-            # Validate Authorization header format
-            if not auth_header.startswith("Bearer "):
-                return jsonify({
-                    "error": "Invalid authorization format",
-                    "message": "Authorization header must start with 'Bearer'"
-                }), 401
+        if not auth_header:
+            return {'message': 'No token provided'}, 401
+        
+        if not auth_header.startswith('Bearer '):
+            return {'message': 'Invalid token format'}, 401
 
-            # Extract token
-            id_token = auth_header.split(" ")[1]
+        try:
+            token = auth_header.split('Bearer ')[1]
+            decoded_token = auth.verify_id_token(token)
             
-            try:
-                # Verify ID token and decode it
-                decoded_token = auth.verify_id_token(id_token)
-                
-                # Attach decoded token to request
-                request.user = decoded_token
+            # Set both user dict and user_id in g
+            g.user = decoded_token
+            g.user_id = decoded_token['uid']
+            
+            return f(*args, **kwargs)
+        
+        except auth.ExpiredIdTokenError:
+            return {'message': 'Token has expired'}, 401
+        except auth.RevokedIdTokenError:
+            return {'message': 'Token has been revoked'}, 401
+        except auth.InvalidIdTokenError:
+            return {'message': 'Invalid token'}, 401
+        
+        except Exception as e:
+            return {'message': str(e)}, 500
 
-                # Role-based authorization check
-                if roles:
-                    user_roles = decoded_token.get('roles', [])
-                    if not any(role in user_roles for role in roles):
-                        return jsonify({
-                            "error": "Insufficient permissions",
-                            "message": f"Required roles: {', '.join(roles)}"
-                        }), 403
-
-                return f(*args, **kwargs)
-
-            except auth.InvalidIdTokenError:
-                return jsonify({
-                    "error": "Invalid token",
-                    "message": "The authentication token is invalid"
-                }), 401
-                
-            except auth.ExpiredIdTokenError:
-                return jsonify({
-                    "error": "Expired token",
-                    "message": "The authentication token has expired"
-                }), 401
-                
-            except auth.RevokedIdTokenError:
-                return jsonify({
-                    "error": "Revoked token",
-                    "message": "The authentication token has been revoked"
-                }), 401
-                
-            except Exception as e:
-                # Log the error here with proper error logging
-                return jsonify({
-                    "error": "Authentication error",
-                    "message": "An error occurred during authentication"
-                }), 401
-
-        return wrapper
-    return decorator
+    return decorated

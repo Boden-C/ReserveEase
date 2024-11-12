@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useState, useEffect } from 'react';
 import {
     signInWithEmailAndPassword,
@@ -152,7 +153,6 @@ export function AuthProvider({ children }) {
  * Hook for using auth context
  * @returns {AuthContextType} Auth context value
  */
-// eslint-disable-next-line react-refresh/only-export-components
 export function useAuth() {
     const context = useContext(AuthContext);
     if (!context) {

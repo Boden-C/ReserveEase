@@ -25,6 +25,14 @@ export async function request(url, options = {}, auth = false) {
             Authorization: `Bearer ${idToken}`,
         };
     }
+    const response = await fetch(url, options);
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message);
+    } else {
+        return response;
+    }
+
 }
 
 window.addReservation = addReservation; // TODO remove
