@@ -1,0 +1,12 @@
+{
+    "files": [],
+    "references": [{ "path": "./tsconfig.app.json" }],
+    "compilerOptions": {
+        "allowJs": true,
+        "checkJs": true,
+        "baseUrl": ".",
+        "paths": {
+            "@/*": ["./src/*"]
+        }
+    }
+}
