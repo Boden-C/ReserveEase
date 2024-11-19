@@ -1,9 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { 
-  getUserReservations, 
-  createReservation, 
-  deleteReservation 
-} from '../scripts/api.js';
+import { getUserReservations, createReservation, deleteReservation } from '../scripts/api.js';
 
 /**
  * Custom hook for managing reservations
@@ -17,67 +13,65 @@ import {
  * }}
  */
 export const useReservations = () => {
-  const [reservations, setReservations] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
+    const [reservations, setReservations] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(null);
 
-  const fetchReservations = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      const data = await getUserReservations();
-      console.log(data)
-      // Sort reservations by start time
-      setReservations(data.sort((a, b) => 
-        new Date(a.start_timestamp) - new Date(b.start_timestamp)
-      ));
-    } catch (err) {
-      setError(err);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+    const fetchReservations = useCallback(async () => {
+        try {
+            setIsLoading(true);
+            const data = await getUserReservations();
+            console.log(data);
+            // Sort reservations by start time
+            setReservations(data.sort((a, b) => new Date(a.start_timestamp) - new Date(b.start_timestamp)));
+        } catch (err) {
+            setError(err);
+        } finally {
+            setIsLoading(false);
+        }
+    }, []);
 
-  useEffect(() => {
-    fetchReservations();
-  }, [fetchReservations]);
+    useEffect(() => {
+        fetchReservations();
+    }, [fetchReservations]);
 
-  const addReservation = async ({ space_id, start_timestamp, end_timestamp }) => {
-    try {
-      setIsLoading(true);
-      const response = await createReservation({ 
-        space_id, 
-        start_timestamp, 
-        end_timestamp 
-      });
-      await fetchReservations();
-      return response.id; // Return the ID from the API response
-    } catch (err) {
-      setError(err);
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    const addReservation = async ({ space_id, start_timestamp, end_timestamp }) => {
+        try {
+            setIsLoading(true);
+            const response = await createReservation({
+                space_id,
+                start_timestamp,
+                end_timestamp,
+            });
+            await fetchReservations();
+            return response.id; // Return the ID from the API response
+        } catch (err) {
+            setError(err);
+            throw err;
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
-  const removeReservation = async (id) => {
-    try {
-      setIsLoading(true);
-      await deleteReservation(id);
-      await fetchReservations();
-    } catch (err) {
-      setError(err);
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    const removeReservation = async (id) => {
+        try {
+            setIsLoading(true);
+            await deleteReservation(id);
+            await fetchReservations();
+        } catch (err) {
+            setError(err);
+            throw err;
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
-  return {
-    reservations,
-    isLoading,
-    error,
-    addReservation,
-    removeReservation,
-    refreshReservations: fetchReservations
-  };
+    return {
+        reservations,
+        isLoading,
+        error,
+        addReservation,
+        removeReservation,
+        refreshReservations: fetchReservations,
+    };
 };

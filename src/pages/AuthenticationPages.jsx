@@ -143,9 +143,7 @@ const SignIn = () => {
                         {errorMessage}
                     </p>
                 )}
-                <Button type="submit">
-                    {isLoading ? 'Signing in...' : 'Sign In'}
-                </Button>
+                <Button type="submit">{isLoading ? 'Signing in...' : 'Sign In'}</Button>
 
                 <p className="text-center text-sm text-gray-600">
                     Don&apos;t have an account?{' '}

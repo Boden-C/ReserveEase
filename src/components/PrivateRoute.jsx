@@ -8,17 +8,17 @@ import { useAuth } from '@/components/AuthContext';
  * @returns {JSX.Element} Protected route
  */
 export function PrivateRoute({ children }) {
-  const { user, loading } = useAuth();
-  const location = useLocation();
+    const { user, loading } = useAuth();
+    const location = useLocation();
 
-  if (loading) {
-    return <div>Loading...</div>; // TODO replace with spinner
-  }
+    if (loading) {
+        return <div>Loading...</div>; // TODO replace with spinner
+    }
 
-  if (!user) {
-    // Redirect to signin but save the attempted url
-    return <Navigate to="/signin" state={{ from: location }} replace />;
-  }
+    if (!user) {
+        // Redirect to signin but save the attempted url
+        return <Navigate to="/signin" state={{ from: location }} replace />;
+    }
 
-  return children;
+    return children;
 }

@@ -25,7 +25,7 @@ export async function request(url, options = {}, auth = false) {
     url = `${import.meta.env.VITE_API_URL}${url}`;
     options.headers = {
         ...options.headers,
-        'Accept': 'application/json',
+        Accept: 'application/json',
         'Content-Type': 'application/json',
     };
     options.credentials = 'same-origin';
@@ -44,7 +44,6 @@ export async function request(url, options = {}, auth = false) {
     } else {
         return response;
     }
-
 }
 
 /**
@@ -57,14 +56,18 @@ export async function request(url, options = {}, auth = false) {
  * @returns {Promise<{id: string, message: string}>} Created reservation info
  */
 export async function createReservation({ space_id, start_timestamp, end_timestamp }) {
-    const response = await request('/reservations/add', {
-        method: 'POST',
-        body: JSON.stringify({
-            space_id,
-            start_timestamp: start_timestamp.toISOString(),
-            end_timestamp: end_timestamp.toISOString()
-        })
-    }, true);
+    const response = await request(
+        '/reservations/add',
+        {
+            method: 'POST',
+            body: JSON.stringify({
+                space_id,
+                start_timestamp: start_timestamp.toISOString(),
+                end_timestamp: end_timestamp.toISOString(),
+            }),
+        },
+        true
+    );
     return response.json();
 }
 
@@ -74,9 +77,13 @@ export async function createReservation({ space_id, start_timestamp, end_timesta
  * @returns {Promise<{message: string}>} Success message
  */
 export async function deleteReservation(reservationId) {
-    const response = await request(`/reservations/delete/${reservationId}`, {
-        method: 'DELETE'
-    }, true);
+    const response = await request(
+        `/reservations/delete/${reservationId}`,
+        {
+            method: 'DELETE',
+        },
+        true
+    );
     return response.json();
 }
 
@@ -85,9 +92,13 @@ export async function deleteReservation(reservationId) {
  * @returns {Promise<Array<Reservation>>} List of user's reservations
  */
 export async function getUserReservations() {
-    const response = await request('/reservations/user', {
-        method: 'GET'
-    }, true);
+    const response = await request(
+        '/reservations/user',
+        {
+            method: 'GET',
+        },
+        true
+    );
     return response.json();
 }
 
@@ -104,32 +115,25 @@ export async function getUserReservations() {
  * @returns {Promise<Array<Reservation>>} Filtered reservations
  */
 export async function getReservations(filters = {}) {
-    const {
-        reservation_id,
-        space_id,
-        start_timestamp,
-        end_timestamp,
-        from,
-        to
-    } = filters;
+    const { reservation_id, space_id, start_timestamp, end_timestamp, from, to } = filters;
 
     const params = new URLSearchParams();
-    
+
     if (reservation_id) params.append('reservation_id', reservation_id);
     if (space_id) params.append('space_id', space_id);
     if (from) {
-        params.append('end_timestamp', '>'+from.toISOString()); // Will get all reservations that exist after from
+        params.append('end_timestamp', '>' + from.toISOString()); // Will get all reservations that exist after from
     } else if (end_timestamp) {
         params.append('end_timestamp', end_timestamp.toISOString());
     }
     if (to) {
-        params.append('start_timestamp', '<'+to.toISOString()); // Will get all reservations that exist before to
+        params.append('start_timestamp', '<' + to.toISOString()); // Will get all reservations that exist before to
     } else if (start_timestamp) {
         params.append('start_timestamp', start_timestamp.toISOString());
     }
 
     const response = await request(`/reservations/get?${params}`, {
-        method: 'GET'
+        method: 'GET',
     });
     return await response.json();
 }

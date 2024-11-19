@@ -1,14 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/components/AuthContext';
-import {
-    Card,
-    CardContent,
-    CardFooter,
-    CardHeader,
-    CardTitle,
-    CardDescription,
-} from '@/components/ui/card';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -96,9 +89,7 @@ export default function SignUp() {
             <Card className="relative w-full max-w-lg backdrop-blur-sm bg-background/95">
                 <CardHeader className="space-y-1">
                     <CardTitle className="text-3xl text-center">Create Account</CardTitle>
-                    <CardDescription className="text-center">
-                        Enter your details to create your account
-                    </CardDescription>
+                    <CardDescription className="text-center">Enter your details to create your account</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <form onSubmit={handleSubmit} className="space-y-4" noValidate>
@@ -110,13 +101,7 @@ export default function SignUp() {
 
                         <div className="space-y-2">
                             <Label htmlFor="name">Name (Optional)</Label>
-                            <Input
-                                id="name"
-                                name="name"
-                                type="text"
-                                value={formData.name}
-                                onChange={handleChange}
-                            />
+                            <Input id="name" name="name" type="text" value={formData.name} onChange={handleChange} />
                         </div>
 
                         <div className="space-y-2">
@@ -148,9 +133,7 @@ export default function SignUp() {
                                 id="rememberMe"
                                 name="rememberMe"
                                 checked={formData.rememberMe}
-                                onCheckedChange={(checked) =>
-                                    setFormData((prev) => ({ ...prev, rememberMe: checked }))
-                                }
+                                onCheckedChange={(checked) => setFormData((prev) => ({ ...prev, rememberMe: checked }))}
                             />
                             <Label htmlFor="rememberMe" className="text-sm font-normal">
                                 Remember me

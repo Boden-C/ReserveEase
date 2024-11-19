@@ -16,7 +16,7 @@ export function getUserFriendlyErrorMessage(error) {
         'auth/invalid-action-code': 'The link you used is invalid. Please request a new one.',
         'auth/requires-recent-login': 'This action requires you to reauthenticate. Please log in again.',
         'auth/network-request-failed': 'Network error. Please check your internet connection and try again.',
-        'auth/unknown': 'An unknown error occurred. Please try again later.'
+        'auth/unknown': 'An unknown error occurred. Please try again later.',
     };
 
     // Check if error has a 'code' property and is listed in the hashmap

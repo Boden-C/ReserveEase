@@ -40,12 +40,12 @@ def verify_token(f: Callable) -> Callable:
 
         try:
             token = auth_header.split('Bearer ')[1]
-            decoded_token = None
+            decoded_token:dict = None
             if (app.config['TESTING']):
                 try:
                     decoded_token = auth.verify_id_token(token)
                 except:
-                    decoded_token = 'test_user'
+                    decoded_token = {}
                     decoded_token['uid'] = 'test_user_id'
             else:
                 decoded_token = auth.verify_id_token(token)  

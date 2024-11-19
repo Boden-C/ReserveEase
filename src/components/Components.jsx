@@ -1,5 +1,3 @@
-/* eslint-disable react/prop-types */
-
 export const Button = ({ children, type = 'button', ...props }) => (
     <button
         type={type}

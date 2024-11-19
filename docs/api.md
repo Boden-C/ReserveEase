@@ -3,6 +3,7 @@
 ## Reservations
 
 ### /reservations/add
+
     Create a new reservation using authenticated user's ID
     ---
     post:
@@ -58,6 +59,7 @@
                                     type: string
 
 ### /reservations/delete/<reservation_id>
+
     Delete an existing reservation by ID, if it belongs to the authenticated user
     ---
     delete:
@@ -78,6 +80,7 @@
             description: Reservation not found
 
 ### /reservations/user
+
     Get all reservations for the authenticated user
     ---
     get:
@@ -92,6 +95,7 @@
                         items: Reservation
 
 ### /reservations/get
+
     Get reservations based on filters
     ---
     get:

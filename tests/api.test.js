@@ -1,13 +1,7 @@
 import { describe, expect, test, beforeAll, afterAll } from 'vitest';
 import { signInWithEmailAndPassword, signOut } from 'firebase/auth';
 import { auth } from '../src/scripts/firebaseConfig.js';
-import {
-    createReservation,
-    deleteReservation,
-    getUserReservations,
-    getReservations
-} from '../src/scripts/api.js';
-
+import { createReservation, deleteReservation, getUserReservations, getReservations } from '../src/scripts/api.js';
 
 beforeAll(async () => {
     // Log in the mock user before tests
@@ -30,14 +24,14 @@ describe('Reservations API', () => {
         const result = await createReservation({
             space_id: mockSpaceId,
             start_timestamp: mockStart,
-            end_timestamp: mockEnd
+            end_timestamp: mockEnd,
         });
 
         expect(result).toHaveProperty('id');
         createdReservationId = result.id;
 
         const userReservations = await getUserReservations();
-        const createdReservation = userReservations.find(r => r.reservation_id === createdReservationId);
+        const createdReservation = userReservations.find((r) => r.reservation_id === createdReservationId);
 
         expect(createdReservation).toBeTruthy();
         expect(createdReservation.space_id).toBe(mockSpaceId);
@@ -48,10 +42,10 @@ describe('Reservations API', () => {
             await createReservation({
                 space_id: mockSpaceId,
                 start_timestamp: mockStart,
-                end_timestamp: mockEnd
+                end_timestamp: mockEnd,
             });
         } catch (error) {
-            console.log("EXPECTED error: time conflict", error);
+            console.log('EXPECTED error: time conflict', error);
             expect(error).toBeTruthy();
         }
     });
@@ -60,10 +54,10 @@ describe('Reservations API', () => {
         try {
             await createReservation({
                 start_timestamp: mockStart,
-                end_timestamp: mockEnd
+                end_timestamp: mockEnd,
             });
         } catch (error) {
-            console.log("EXPECTED error: missing space_id", error);
+            console.log('EXPECTED error: missing space_id', error);
             expect(error).toBeTruthy();
         }
     });
@@ -73,24 +67,24 @@ describe('Reservations API', () => {
             await createReservation({
                 space_id: mockSpaceId,
                 start_timestamp: 'not-a-date',
-                end_timestamp: mockEnd
+                end_timestamp: mockEnd,
             });
         } catch (error) {
-            console.log("EXPECTED error: invalid date formats", error);
+            console.log('EXPECTED error: invalid date formats', error);
             expect(error).toBeTruthy();
         }
     });
 
     test('Delete Reservation - success', async () => {
         if (!createdReservationId) {
-            throw new Error("No reservation ID to delete");
+            throw new Error('No reservation ID to delete');
         }
         await deleteReservation(createdReservationId); // Delete the reservation
 
         try {
             await deleteReservation(createdReservationId);
         } catch (error) {
-            console.log("EXPECTED error: reservation already deleted", error);
+            console.log('EXPECTED error: reservation already deleted', error);
             expect(error).toBeTruthy();
         }
     });
@@ -100,10 +94,10 @@ describe('Reservations API', () => {
             await getReservations({
                 space_id: '', // Invalid space_id
                 from: mockStart,
-                to: mockEnd
+                to: mockEnd,
             });
         } catch (error) {
-            console.log("EXPECTED error: invalid space_id filter", error);
+            console.log('EXPECTED error: invalid space_id filter', error);
             expect(error).toBeTruthy();
         }
     });
@@ -119,10 +113,10 @@ describe('Reservations API', () => {
             await createReservation({
                 space_id: mockSpaceId,
                 start_timestamp: mockStart,
-                end_timestamp: mockStart // Start and end are the same
+                end_timestamp: mockStart, // Start and end are the same
             });
         } catch (error) {
-            console.log("EXPECTED error: zero duration", error);
+            console.log('EXPECTED error: zero duration', error);
             expect(error).toBeTruthy();
         }
     });
@@ -132,13 +126,11 @@ describe('Reservations API', () => {
             await getReservations({
                 space_id: mockSpaceId,
                 from: mockEnd, // `from` is after `to`
-                to: mockStart
+                to: mockStart,
             });
         } catch (error) {
-            console.log("EXPECTED error: invalid range", error);
+            console.log('EXPECTED error: invalid range', error);
             expect(error).toBeTruthy();
         }
     });
-
 });
-
