@@ -1,20 +1,51 @@
-import { useNavigate } from 'react-router-dom';
-import { Button } from '../components/Components';
+import { useState } from "react";
+import ReservationsList from "../components/reservations-list";
+import AddReservation from "../components/add-reservation";
+import { useReservations } from "../components/useReservations";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const DashboardPage = () => {
-    const navigate = useNavigate();
+  const {
+    reservations,
+    isLoading,
+    error,
+    addReservation,
+    removeReservation
+  } = useReservations();
+  
+  // State for delete-specific error handling
+  const [deleteError, setDeleteError] = useState(null);
 
-    return (
-        <div className="flex items-center justify-center min-h-screen bg-gray-100">
-            <div className="p-8 bg-white shadow-md rounded-lg w-80 text-center">
-                <h1 className="text-2xl font-bold mb-4">Dashboard</h1>
-                <div className="space-y-4">
-                    <Button onClick={() => navigate('/reserve')}>Reserve</Button>
-                    <Button onClick={() => navigate('/delete')}>Delete</Button>
-                </div>
-            </div>
-        </div>
-    );
+  const handleDelete = async (id) => {
+    try {
+      setDeleteError(null);
+      await removeReservation(id);
+    } catch (err) {
+      setDeleteError(`Failed to delete reservation: ${err.message}`);
+    }
+  };
+
+  return (
+    <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+      {deleteError && (
+        <Alert variant="destructive" className="md:col-span-2">
+          <AlertDescription>{deleteError}</AlertDescription>
+        </Alert>
+      )}
+      
+      <ReservationsList
+        reservations={reservations}
+        isLoading={isLoading}
+        error={error}
+        onDelete={handleDelete}
+      />
+      
+      <AddReservation
+        onSubmit={addReservation}
+        isLoading={isLoading}
+      />
+    </div>
+  );
 };
 
 export default DashboardPage;

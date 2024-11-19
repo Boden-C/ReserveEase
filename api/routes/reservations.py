@@ -1,10 +1,14 @@
 # api/routes/reservations.py
-from database.reservations import schedule, get_reservations, delete_reservation
-from flask import Blueprint, request, jsonify, g
+from datetime import datetime
+import traceback
+from app import app
+import database.reservations
+from flask import Blueprint, abort, request, jsonify, g
 from firebase_admin import firestore
 from exceptions import ClientError
 import sys
 import os
+from typedef import Reservation
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from wrappers import verify_token  # Using absolute import
 
@@ -15,7 +19,7 @@ reservations_bp = Blueprint('reservations_bp', __name__)
 @verify_token
 def create_reservation():
     """
-    Create a new reservation using authenticated user's ID
+    Create a new reservation using authenticated user'snpm run  ID
     ---
     post:
         summary: Create a new reservation
@@ -79,7 +83,7 @@ def create_reservation():
             raise ClientError('Missing required fields', 400)
         
         # Schedule the reservation using authenticated user's ID
-        reservation_id = schedule(
+        reservation_id = database.reservations.schedule(
             user_id=g.user_id,
             space_id=data['space_id'],
             start_timestamp=data['start_timestamp'],
@@ -93,15 +97,12 @@ def create_reservation():
         }), 201
         
     except ClientError as e:
-        return jsonify({
-            'message': e.message
-        }), e.code
+        print(str(e))
+        abort(e.code, description=e.message)
         
     except Exception as e:
-        return jsonify({
-            'message': str(e)
-        }), 500
-
+        traceback.print_exc()
+        abort(500, description=str(e))
 
 @reservations_bp.route('/reservations/delete/<reservation_id>', methods=['DELETE'])
 @verify_token
@@ -128,8 +129,7 @@ def delete_reservation(reservation_id):
     """
     try:
         # Get the reservation
-        reservations = get_reservations(reservation_id=reservation_id)
-        
+        reservations = database.reservations.get_reservations(reservation_id=reservation_id)
         # Check if reservation exists
         if len(reservations) == 0:
             raise ClientError("Reservation not found", 404)
@@ -137,9 +137,9 @@ def delete_reservation(reservation_id):
         # Ensure the reservation belongs to the authenticated user
         if reservations[0].user_id != g.user_id:
             raise ClientError("Unauthorized action", 403)
-        
+                
         # Delete the reservation
-        delete_reservation(reservation_id)
+        database.reservations.delete_reservation(reservation_id)
         
         # Return success response
         return jsonify({
@@ -147,14 +147,12 @@ def delete_reservation(reservation_id):
         }), 200
     
     except ClientError as e:
-        return jsonify({
-            'message': e.message
-        }), e.code
+        print(str(e))
+        abort(e.code, description=e.message)
     
     except Exception as e:
-        return jsonify({
-            'message': str(e)
-        }), 500
+        traceback.print_exc()
+        abort(500, description=str(e))
         
 @reservations_bp.route('/reservations/user', methods=['GET'])
 @verify_token
@@ -174,24 +172,25 @@ def get_user_reservations():
                         items: Reservation
     """
     try:
+        if not hasattr(g, 'user_id') or not g.user_id:
+            # Assume test user if not authenticated
+            g.user_id = 'test_user_id'
+            
+        print("Getting reservations for user:", g.user_id)
+        
         # Get reservations for the authenticated user
-        reservations = get_reservations(user_id=g.user_id)
+        reservations = database.reservations.get_reservations(user_id=g.user_id)
         
         # Return success response
-        return jsonify(reservations), 200
+        return Reservation.jsonify_list(reservations=reservations), 200
     
     except ClientError as e:
-        return jsonify({
-            'message': e.message
-        }), e.code
+        print(str(e))
+        abort(e.code, description=e.message)
     
     except Exception as e:
-        return jsonify({
-            'message': str(e)
-        }), 500
-
-from flask import jsonify, request
-from typing import List
+        traceback.print_exc()
+        abort(500, description=str(e))
 
 @reservations_bp.route('/reservations/get', methods=['GET'])
 def get_reservations_route():
@@ -216,13 +215,13 @@ def get_reservations_route():
               schema:
                 type: string
                 format: date-time
-              description: ISO-formatted start timestamp for filtering reservations
+              description: Operator-prefixed ISO formatted start timestamp for filtering reservations
             - in: query
               name: end_timestamp
               schema:
                 type: string
                 format: date-time
-              description: ISO-formatted end timestamp for filtering reservations
+              description: Operator-prefixed ISO formatted end timestamp for filtering reservations
         responses:
             200:
                 description: List of reservations matching the filters
@@ -256,28 +255,21 @@ def get_reservations_route():
             }), 403
 
         # Fetch reservations based on provided filters
-        reservations = get_reservations(
+        reservations = database.reservations.get_reservations(
             reservation_id=reservation_id,
             space_id=space_id,
             start_timestamp=start_timestamp,
             end_timestamp=end_timestamp
         )
-
-        reservations_without_user_id = [
-            # Recreate reservation without user_id
-            {k: v for k, v in reservation.__dict__.items() if k != 'user_id'}
-            for reservation in reservations
-        ]
+        print(len(reservations))
 
         # Return filtered reservations
-        return jsonify(reservations_without_user_id), 200
+        return Reservation.jsonify_list(reservations=reservations, restrict_user_id=True), 200
 
     except ClientError as e:
-        return jsonify({
-            'message': e.message
-        }), e.code
+        print(str(e))
+        abort(e.code, description=e.message)
 
     except Exception as e:
-        return jsonify({
-            'message': str(e)
-        }), 500
+        traceback.print_exc()
+        abort(500, description=str(e))

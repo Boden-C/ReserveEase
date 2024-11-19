@@ -2,6 +2,18 @@
 import { validateUser } from './auth.js';
 
 /**
+ * Represents a parking space reservation
+ * @typedef {Object} Reservation
+ * @property {string} reservation_id - Unique identifier for the reservation
+ * @property {string?} user_id - ID of the user who made the reservation
+ * @property {string} space_id - ID of the reserved parking space
+ * @property {string?} status - Current status of the reservation
+ * @property {Date?} created_at - ISO timestamp of when the reservation was created
+ * @property {Date} start_timestamp - ISO timestamp of when the reservation starts
+ * @property {Date} end_timestamp - ISO timestamp of when the reservation ends
+ */
+
+/**
  * Makes a request to the API.
  * @param {string} url - The endpoint URL.
  * @param {object} options - Fetch options.
@@ -35,60 +47,89 @@ export async function request(url, options = {}, auth = false) {
 
 }
 
-window.addReservation = addReservation; // TODO remove
 /**
- * Add a new reservation for the currently authenticated user
- * @param {string} spaceId - The ID of the space to reserve
- * @param {Date} start - Start time of the reservation
- * @param {Date} end - End time of the reservation
- * @returns {Promise<string>} - The reservation ID if successful
- * @throws {Error} - If the request fails
+ * Creates a new reservation
+ * @param {{
+ *   space_id: string,
+ *   start_timestamp: Date,
+ *   end_timestamp: Date
+ * }} reservation - Reservation details
+ * @returns {Promise<{id: string, message: string}>} Created reservation info
  */
-export async function addReservation(spaceId, start, end) {
-    // Convert dates to ISO strings
-    const startTimestamp = start.toISOString();
-    const endTimestamp = end.toISOString();
-
+export async function createReservation({ space_id, start_timestamp, end_timestamp }) {
     const response = await request('/reservations/add', {
         method: 'POST',
         body: JSON.stringify({
-            space_id: spaceId,
-            start_timestamp: startTimestamp,
-            end_timestamp: endTimestamp
-        }),
+            space_id,
+            start_timestamp: start_timestamp.toISOString(),
+            end_timestamp: end_timestamp.toISOString()
+        })
     }, true);
-
-    // Handle non-200 responses
-    if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message);
-    }
-
-    // Parse successful response
-    const data = await response.json();
-    return data.id;  // Return the reservation ID
+    return response.json();
 }
 
 /**
  * Deletes a reservation
- * @param {number} id - The parking ID
- * @param {string} time_block - The start specific time block for the reservation
+ * @param {string} reservationId - ID of reservation to delete
+ * @returns {Promise<{message: string}>} Success message
  */
-export function deleteReservation(id, time_block) {
-    const data = {
-        charger_id: id,
-        time_block: time_block,
-    };
+export async function deleteReservation(reservationId) {
+    const response = await request(`/reservations/delete/${reservationId}`, {
+        method: 'DELETE'
+    }, true);
+    return response.json();
+}
 
-    return request(
-        '/reservations/delete',
-        {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(data),
-        },
-        true
-    ); // `true` if authentication is required
+/**
+ * Gets all reservations for the authenticated user
+ * @returns {Promise<Array<Reservation>>} List of user's reservations
+ */
+export async function getUserReservations() {
+    const response = await request('/reservations/user', {
+        method: 'GET'
+    }, true);
+    return response.json();
+}
+
+/**
+ * Gets and filters reservations based on criteria
+ * @param {{
+ *   reservation_id?: string,
+ *   space_id?: string,
+ *   start_timestamp?: Date,
+ *   end_timestamp?: Date,
+ *   from?: Date,        // Filter reservations where end_time > from
+ *   to?: Date          // Filter reservations where start_time < to
+ * }} filters - Optional filters
+ * @returns {Promise<Array<Reservation>>} Filtered reservations
+ */
+export async function getReservations(filters = {}) {
+    const {
+        reservation_id,
+        space_id,
+        start_timestamp,
+        end_timestamp,
+        from,
+        to
+    } = filters;
+
+    const params = new URLSearchParams();
+    
+    if (reservation_id) params.append('reservation_id', reservation_id);
+    if (space_id) params.append('space_id', space_id);
+    if (from) {
+        params.append('end_timestamp', '>'+from.toISOString()); // Will get all reservations that exist after from
+    } else if (end_timestamp) {
+        params.append('end_timestamp', end_timestamp.toISOString());
+    }
+    if (to) {
+        params.append('start_timestamp', '<'+to.toISOString()); // Will get all reservations that exist before to
+    } else if (start_timestamp) {
+        params.append('start_timestamp', start_timestamp.toISOString());
+    }
+
+    const response = await request(`/reservations/get?${params}`, {
+        method: 'GET'
+    });
+    return await response.json();
 }

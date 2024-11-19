@@ -47,6 +47,4 @@ describe('Firebase Authentication', () => {
         await signout();
         console.log('Sign-out successful');
     });
-
-    // Authenticated request tests are in api.test.js
 });

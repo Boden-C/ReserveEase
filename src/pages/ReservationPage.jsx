@@ -1,6 +1,6 @@
 // components/AddReservationForm.js
 import { useState } from 'react';
-import { addReservation, deleteReservation } from '../scripts/api';
+import { createReservation, deleteReservation } from '@/scripts/api';
 import { useNavigate } from 'react-router-dom';
 
 export const AddReservation = () => {

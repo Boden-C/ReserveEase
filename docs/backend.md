@@ -20,6 +20,17 @@ Custom exception for client-side errors.
         422 Unprocessable Entity: Valid syntax but semantic issues
 ```
 
+## api/typedef.py
+`api.typedef.to_dict(self)`
+```
+
+```
+
+`api.typedef.jsonify_list(reservations: List['Reservation'], restrict_user_id: Optional[bool])`
+```
+
+```
+
 ## api/wrappers.py
 `api.wrappers.verify_token(f: Callable) -> Callable`
 ```
@@ -71,22 +82,27 @@ Delete a reservation from Firestore.
         reservation_id (str): ID of the reservation to delete
 ```
 
-`api.database.reservations.get_reservations(reservation_id: Optional[str], user_id: Optional[str], space_id: Optional[str], start_timestamp: Optional[str], end_timestamp: Optional[str]) -> List[Reservation]`
+`api.database.reservations.get_reservations(reservation_id: Optional[str], user_id: Optional[str], space_id: Optional[str], start_timestamp: Optional[str], end_timestamp: Optional[str]) -> List['Reservation']`
 ```
-Fetches reservations based on provided filters.
+Fetches reservations based on provided filters, with flexible operators for timestamps.
     
     Args:
         reservation_id (str, optional): Unique ID of the reservation.
         user_id (str, optional): The ID of the user who made the reservation.
         space_id (str, optional): The ID of the parking space for the reservation.
-        start_timestamp (str, optional): ISO-formatted start timestamp for filtering reservations.
-        end_timestamp (str, optional): ISO-formatted end timestamp for filtering reservations.
+        start_timestamp (datetime, optional): Start timestamp for filtering reservations.
+        end_timestamp (datetime, optional): End timestamp for filtering reservations.
+        start_timestamp (str, optional): Operator-prefixed start timestamp for filtering.
+        end_timestamp (str, optional): Operator-prefixed end timestamp for filtering.
     
     Returns:
         List[Reservation]: List of reservations matching the filters.
     
     Raises:
         ClientError: If timestamp format is invalid or query execution fails.
+        
+    Example:
+        get_reservations(start_timestamp='>=2022-01-01T00:00:00Z')
 ```
 
 `api.database.reservations.schedule(user_id: str, space_id: str, start_timestamp: str, end_timestamp: str) -> str`
@@ -103,6 +119,11 @@ Validates reservation times and creates a new reservation in Firestore.
         str: Reservation ID
 ```
 
+`api.database.reservations.parse_operator_timestamp(value: str) -> Tuple[str, datetime]`
+```
+
+```
+
 ## api/routes/authenticate.py
 `api.routes.authenticate.authenticate()`
 ```
@@ -112,7 +133,7 @@ Route to check if user is valid.
 ## api/routes/reservations.py
 `api.routes.reservations.create_reservation()`
 ```
-Create a new reservation using authenticated user's ID
+Create a new reservation using authenticated user'snpm run  ID
     ---
     post:
         summary: Create a new reservation
@@ -227,13 +248,13 @@ Get reservations based on filters
               schema:
                 type: string
                 format: date-time
-              description: ISO-formatted start timestamp for filtering reservations
+              description: Operator-prefixed ISO formatted start timestamp for filtering reservations
             - in: query
               name: end_timestamp
               schema:
                 type: string
                 format: date-time
-              description: ISO-formatted end timestamp for filtering reservations
+              description: Operator-prefixed ISO formatted end timestamp for filtering reservations
         responses:
             200:
                 description: List of reservations matching the filters
@@ -251,67 +272,5 @@ Get reservations based on filters
                             properties:
                                 message:
                                     type: string
-```
-
-## api/tests/conftest.py
-`api.tests.conftest.app()`
-```
-Create and configure a test Flask application
-```
-
-`api.tests.conftest.client(app)`
-```
-Create a test client for the app
-```
-
-`api.tests.conftest.mock_db()`
-```
-Fixture to mock Firebase database with test data
-```
-
-`api.tests.conftest.mock_auth()`
-```
-Fixture to mock Firebase authentication
-```
-
-`api.tests.conftest.auth_headers()`
-```
-Fixture to provide authentication headers
-```
-
-## api/tests/test_reservations.py
-`api.tests.test_reservations.test_add_reservation_success(self, client, mock_db, mock_auth, auth_headers)`
-```
-Test successfully adding a reservation
-```
-
-`api.tests.test_reservations.test_add_reservation_unauthorized(self, client, mock_db)`
-```
-Test adding a reservation without auth token
-```
-
-`api.tests.test_reservations.test_add_reservation_already_reserved(self, client, mock_db, mock_auth, auth_headers)`
-```
-Test attempting to add a reservation for an already reserved time block
-```
-
-`api.tests.test_reservations.test_add_reservation_invalid_token(self, client, mock_db, mock_auth, auth_headers)`
-```
-Test adding a reservation with invalid token
-```
-
-`api.tests.test_reservations.test_delete_reservation_success(self, client, mock_db, mock_auth, auth_headers)`
-```
-Test successfully deleting a reservation
-```
-
-`api.tests.test_reservations.test_delete_reservation_unauthorized_user(self, client, mock_db, mock_auth, auth_headers)`
-```
-Test attempting to delete someone else's reservation
-```
-
-`api.tests.test_reservations.test_delete_reservation_no_token(self, client, mock_db)`
-```
-Test deleting a reservation without auth token
 ```
 

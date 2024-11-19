@@ -1,13 +1,15 @@
-# reservations.py
-from typing import List, Optional
+# database/reservations.py
+from typing import List, Optional, Tuple
 from firebase_admin import firestore
-from datetime import datetime
+from datetime import datetime, timezone
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from typedef import Reservation
 from exceptions import ClientError
-from api.types import Reservation
 
-db = firestore.client()
 
-def create_reservation(user_id: str, space_id: str, start_timestamp: datetime, end_timestamp: datetime) -> str:
+def __create_reservation(user_id: str, space_id: str, start_timestamp: datetime, end_timestamp: datetime) -> str:
     """
     Create a new reservation in Firestore.
 
@@ -24,11 +26,12 @@ def create_reservation(user_id: str, space_id: str, start_timestamp: datetime, e
     reservation_data = {
         'user_id': user_id,
         'space_id': space_id,
-        'start_timestamp': firestore.Timestamp.from_datetime(start_timestamp),
-        'end_timestamp': firestore.Timestamp.from_datetime(end_timestamp),
+        'start_timestamp': start_timestamp,
+        'end_timestamp': end_timestamp,
         'created_at': firestore.SERVER_TIMESTAMP,
         'status': 'active'
-    }
+    }    
+    db = firestore.client()
     
     # Add to Firestore
     reservations_ref = db.collection('reservations').document()
@@ -45,6 +48,8 @@ def delete_reservation(reservation_id: str) -> None:
     Args:
         reservation_id (str): ID of the reservation to delete
     """
+    db = firestore.client()
+    
     # Get reservation reference
     reservation_ref = db.collection('reservations').document(reservation_id)
     
@@ -59,24 +64,31 @@ def get_reservations(
     user_id: Optional[str] = None,
     space_id: Optional[str] = None,
     start_timestamp: Optional[str] = None,
-    end_timestamp: Optional[str] = None
-) -> List[Reservation]:
+    end_timestamp: Optional[str] = None,
+) -> List['Reservation']:
     """
-    Fetches reservations based on provided filters.
+    Fetches reservations based on provided filters, with flexible operators for timestamps.
 
     Args:
         reservation_id (str, optional): Unique ID of the reservation.
         user_id (str, optional): The ID of the user who made the reservation.
         space_id (str, optional): The ID of the parking space for the reservation.
-        start_timestamp (str, optional): ISO-formatted start timestamp for filtering reservations.
-        end_timestamp (str, optional): ISO-formatted end timestamp for filtering reservations.
+        start_timestamp (datetime, optional): Start timestamp for filtering reservations.
+        end_timestamp (datetime, optional): End timestamp for filtering reservations.
+        start_timestamp (str, optional): Operator-prefixed start timestamp for filtering.
+        end_timestamp (str, optional): Operator-prefixed end timestamp for filtering.
 
     Returns:
         List[Reservation]: List of reservations matching the filters.
     
     Raises:
         ClientError: If timestamp format is invalid or query execution fails.
+        
+    Example:
+        get_reservations(start_timestamp='>=2022-01-01T00:00:00Z')
     """
+    db = firestore.client()
+    
     reservations_ref = db.collection("reservations")
     
     # If reservation_id is provided, fetch a single reservation by its document ID
@@ -91,34 +103,41 @@ def get_reservations(
                 reservation_id=reservation_doc.id,
                 user_id=reservation_doc.get("user_id"),
                 space_id=reservation_doc.get("space_id"),
-                start_timestamp=reservation_doc.get("start_timestamp").to_datetime(),
-                end_timestamp=reservation_doc.get("end_timestamp").to_datetime()
+                start_timestamp=reservation_doc.get("start_timestamp"),
+                end_timestamp=reservation_doc.get("end_timestamp")
             )
         ]
+        
+    def parse_operator_timestamp(value: str) -> Tuple[str, datetime]:
+        # Define possible operators
+        operators = ['>=', '<=', '>', '<', '==', '!=']   
+        try: 
+            for operator in operators:
+                if value.startswith(operator):
+                    timestamp_str = value[len(operator):]
+                    return operator, datetime.fromisoformat(timestamp_str)
+            # Default to exact match if no operator is found
+            return "==", datetime.fromisoformat(value)
+        except ValueError:
+            raise ClientError("Invalid timestamp format. Must use ISO 8601 and optionally prefixed by a valid operator.")        
 
-    # Otherwise, apply filters to query all matching reservations
     query = reservations_ref
+    
+    if start_timestamp:
+        start_op, start_time = parse_operator_timestamp(start_timestamp)
+        print("start time must be", start_op, start_time)
+        query = query.where("start_timestamp", start_op, start_time)
+    
+    if end_timestamp:
+        end_op, end_time = parse_operator_timestamp(end_timestamp)
+        print("end time must be", end_op, end_time)
+        query = query.where("end_timestamp", end_op, end_time)
+    
+    # # Otherwise, apply filters to query all matching reservations
     if user_id:
         query = query.where("user_id", "==", user_id)
     if space_id:
         query = query.where("space_id", "==", space_id)
-    if start_timestamp:
-        try:
-            start = datetime.fromisoformat(start_timestamp.replace('Z', '+00:00'))
-            query = query.where("start_timestamp", ">=", start)
-        except ValueError:
-            raise ClientError("Invalid format for start_timestamp. Expected ISO format.")
-    if end_timestamp:
-        try:
-            end = datetime.fromisoformat(end_timestamp.replace('Z', '+00:00'))
-            query = query.where("end_timestamp", "<=", end)
-        except ValueError:
-            raise ClientError("Invalid format for end_timestamp. Expected ISO format.")
-    
-    # Validate timestamps if both provided
-    if start_timestamp and end_timestamp:
-        if start >= end:
-            raise ClientError("Start time must be before end time")
 
     # Execute the query and retrieve results
     results = query.stream()
@@ -127,12 +146,11 @@ def get_reservations(
             reservation_id=doc.id,
             user_id=doc.get("user_id"),
             space_id=doc.get("space_id"),
-            start_timestamp=doc.get("start_timestamp").to_datetime(),
-            end_timestamp=doc.get("end_timestamp").to_datetime()
+            start_timestamp=doc.get("start_timestamp"),
+            end_timestamp=doc.get("end_timestamp")
         )
         for doc in results
     ]
-
 
 
 def schedule(
@@ -153,19 +171,33 @@ def schedule(
     Returns:
         str: Reservation ID
     """
+    db = firestore.client()
+    
     # Validate input
     try:
-        # Check conversion
-        start = datetime.fromisoformat(start_timestamp.replace('Z', '+00:00'))
-        end = datetime.fromisoformat(end_timestamp.replace('Z', '+00:00'))
+        # Convert timestamps to UTC
+        start = datetime.fromisoformat(start_timestamp).astimezone(timezone.utc)
+        end = datetime.fromisoformat(end_timestamp).astimezone(timezone.utc)
         
         # Check if start time is in the past
-        if start < datetime.now():
+        if start < datetime.now(timezone.utc):
             raise ClientError("Start time must be in the future")
         
         # Check for valid time range
         if start >= end:
             raise ClientError("Start time must be before end time")
+        
+        # Check if same day
+        if start.date() != end.date():
+            raise ClientError("Reservation must be on the same day")
+        
+        # Check within limit
+        if (end - start).total_seconds() > 5400:
+            raise ClientError("Reservation must be less than 1.5 hours")
+        
+        # Check it is every 15 minutes
+        if start.minute % 15 != 0 or end.minute % 15 != 0:
+            raise ClientError("Reservation must be in 15-minute increments")
         
         # TODO: Check for valid space_id
         
@@ -181,8 +213,7 @@ def schedule(
             raise ClientError("Time conflict with existing reservation", 409)
         
         # If no conflicts, create the reservation
-        return create_reservation(user_id, space_id, start, end)
+        return __create_reservation(user_id, space_id, start, end)
         
     except ValueError:
         raise ClientError("Invalid timestamp format. Use ISO 8601 format")
-    

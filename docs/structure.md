@@ -4,18 +4,14 @@ api/
 - app.py
 - config.py
 - database/
-  - init.py
+  - __init__.py
   - reservations.py
 - exceptions.py
 - routes/
   - __init__.py
   - authenticate.py
   - reservations.py
-- tests/
-  - __init__.py
-  - conftest.py
-  - test_reservations.py
-- types.py
+- typedef.py
 - wrappers.py
 
 src/
@@ -64,6 +60,7 @@ src/
   - index.css
 
 tests/
+- api.test.js
 - auth.test.js
 - setup.js
 

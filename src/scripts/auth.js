@@ -28,7 +28,7 @@ export async function signin(email, password) {
     return idToken;
 }
 
-window.signout = signout; // TODO remove
+// window.signout = signout; // TODO remove
 /**
  * Signs out the current user.
  * @returns {Promise<void>}
@@ -38,7 +38,7 @@ export async function signout() {
     await signOut(auth);
 }
 
-window.validateUser = validateUser; // TODO remove
+// window.validateUser = validateUser; // TODO remove
 /**
  * Authenticates the user and returns the Firebase ID token.
  * @returns {Promise<string>} The Firebase ID token.

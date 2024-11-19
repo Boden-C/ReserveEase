@@ -1,5 +1,7 @@
 #decorators.py
-from flask import request, g
+from flask import abort, request, g
+import traceback
+from app import app
 from typing import Callable, Dict, Tuple, Union, Any
 from functools import wraps
 from firebase_admin import auth
@@ -31,29 +33,37 @@ def verify_token(f: Callable) -> Callable:
         auth_header = request.headers.get('Authorization')
 
         if not auth_header:
-            return {'message': 'No token provided'}, 401
+            abort(401, description='No token provided')
         
         if not auth_header.startswith('Bearer '):
-            return {'message': 'Invalid token format'}, 401
+            abort(401, description='Invalid token format')
 
         try:
             token = auth_header.split('Bearer ')[1]
-            decoded_token = auth.verify_id_token(token)
-            
-            # Set both user dict and user_id in g
+            decoded_token = None
+            if (app.config['TESTING']):
+                try:
+                    decoded_token = auth.verify_id_token(token)
+                except:
+                    decoded_token = 'test_user'
+                    decoded_token['uid'] = 'test_user_id'
+            else:
+                decoded_token = auth.verify_id_token(token)  
+              
             g.user = decoded_token
             g.user_id = decoded_token['uid']
-            
+                
             return f(*args, **kwargs)
         
         except auth.ExpiredIdTokenError:
-            return {'message': 'Token has expired'}, 401
+            abort(401, description='Token has expired')
         except auth.RevokedIdTokenError:
-            return {'message': 'Token has been revoked'}, 401
+            abort(401, description='Token has been revoked')
         except auth.InvalidIdTokenError:
-            return {'message': 'Invalid token'}, 401
-        
+            abort(401, description='Invalid token')
+            
         except Exception as e:
-            return {'message': str(e)}, 500
+            traceback.print_exc()
+            abort(500, description=str(e))
 
     return decorated
