@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import DatePicker from './date-picker';
-import TimePicker from './time-picker';
+import TimePicker from './ui/time-picker/time-picker';
 
 /**
  * Component for adding a new reservation with date and time selection
@@ -16,8 +16,8 @@ import TimePicker from './time-picker';
 const AddReservation = ({ onSubmit, isLoading }) => {
     const [spaceId, setSpaceId] = useState('');
     const [date, setDate] = useState(null);
-    const [startTime, setStartTime] = useState(null);
-    const [endTime, setEndTime] = useState(null);
+    const [startTime, setStartTime] = useState('');
+    const [endTime, setEndTime] = useState('');
     const [errors, setErrors] = useState({
         spaceId: null,
         date: null,
@@ -29,8 +29,8 @@ const AddReservation = ({ onSubmit, isLoading }) => {
     const resetForm = () => {
         setSpaceId('');
         setDate(null);
-        setStartTime(null);
-        setEndTime(null);
+        setStartTime('');
+        setEndTime('');
         setErrors({
             spaceId: null,
             date: null,
@@ -75,8 +75,10 @@ const AddReservation = ({ onSubmit, isLoading }) => {
         }
 
         // Create Date objects for the timestamps
-        const [startHours, startMinutes] = startTime.split(':').map(Number);
-        const [endHours, endMinutes] = endTime.split(':').map(Number);
+        const startHours = startTime.hour;
+        const startMinutes = startTime.minute;
+        const endHours = endTime.hour;
+        const endMinutes = endTime.minute;
 
         const startTimestamp = new Date(date);
         startTimestamp.setHours(startHours, startMinutes, 0);
@@ -94,6 +96,7 @@ const AddReservation = ({ onSubmit, isLoading }) => {
         }
 
         try {
+            console.log(startTimestamp, endTimestamp);
             await onSubmit({
                 space_id: spaceId,
                 start_timestamp: startTimestamp,
@@ -146,7 +149,7 @@ const AddReservation = ({ onSubmit, isLoading }) => {
                     <div className="space-y-2">
                         <Label>Start Time</Label>
                         <div className={errors.startTime ? 'border rounded-md border-red-500' : ''}>
-                            <TimePicker onTimeChange={setStartTime} minTime="09:00" maxTime="21:45" value={startTime} />
+                            <TimePicker onChange={(time) => setStartTime(time)} value={startTime} />
                         </div>
                         {errors.startTime && <p className="text-sm text-red-500">{errors.startTime}</p>}
                     </div>
@@ -154,12 +157,7 @@ const AddReservation = ({ onSubmit, isLoading }) => {
                     <div className="space-y-2">
                         <Label>End Time</Label>
                         <div className={errors.endTime ? 'border rounded-md border-red-500' : ''}>
-                            <TimePicker
-                                onTimeChange={setEndTime}
-                                minTime={startTime || '09:00'}
-                                maxTime="22:00"
-                                value={endTime}
-                            />
+                            <TimePicker onChange={(time) => setEndTime(time)} value={endTime} />
                         </div>
                         {errors.endTime && <p className="text-sm text-red-500">{errors.endTime}</p>}
                     </div>
