@@ -1,75 +1,63 @@
 import { format } from 'date-fns';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Loader2, Trash2 } from 'lucide-react';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Calendar, Loader2, Trash2 } from 'lucide-react';
 
 /**
- * Component to display a list of user reservations
+ * Component to display a simplified list of user reservations
  * @param {{
- *   reservations: import('../scripts/api').Reservation[],
- *   isLoading: boolean,
- *   error: Error | null,
+ *   reservations: Array<{
+ *     reservation_id: string,
+ *     space_id: string,
+ *     start_timestamp: string,
+ *     end_timestamp: string
+ *   }>,
+ *   isFirstLoad: boolean,
  *   onDelete: (id: string) => Promise<void>
  * }} props
  */
-const ReservationsList = ({ reservations, isLoading, error, onDelete }) => {
-    if (error) {
+const ReservationsList = ({ reservations, isFirstLoad, onDelete }) => {
+    // Only show loading on first load when there's no data
+    if (isFirstLoad && reservations.length === 0) {
         return (
-            <Alert variant="destructive">
-                <AlertDescription>Error loading reservations: {error.message}</AlertDescription>
-            </Alert>
+            <div className="flex items-center justify-center h-full">
+                <Loader2 className="h-8 w-8 animate-spin" />
+            </div>
         );
     }
 
-    console.log('now', reservations);
-
     return (
-        <Card className="h-[calc(100vh-2rem)] overflow-hidden flex flex-col">
-            <CardHeader>
-                <CardTitle>Your Reservations</CardTitle>
-                <CardDescription>View and manage your parking reservations</CardDescription>
-            </CardHeader>
-            <CardContent className="flex-1 overflow-auto">
-                {isLoading ? (
-                    <div className="flex items-center justify-center h-full">
-                        <Loader2 className="h-8 w-8 animate-spin" />
-                    </div>
-                ) : reservations.length === 0 ? (
-                    <div className="text-center text-gray-500 mt-8">No reservations found</div>
-                ) : (
-                    <div className="space-y-4">
-                        {reservations.map((reservation) => (
-                            <div key={reservation.reservation_id} className="p-4 border rounded-lg bg-card">
-                                <div className="flex justify-between items-start">
-                                    <div>
-                                        <h4 className="font-semibold mb-2">
-                                            Reservation: {reservation.reservation_id + '-space' + reservation.space_id}
-                                        </h4>
-                                        <div className="text-sm text-gray-500 space-y-1">
-                                            <p>
-                                                Start:{' '}
-                                                {format(new Date(reservation.start_timestamp), 'MMM d, yyyy h:mm a')}
-                                            </p>
-                                            <p>
-                                                End: {format(new Date(reservation.end_timestamp), 'MMM d, yyyy h:mm a')}
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        onClick={() => onDelete(reservation.reservation_id)}
-                                    >
-                                        <Trash2 className="h-4 w-4" />
-                                    </Button>
+        <div className="space-y-4">
+            {reservations.map((reservation) => (
+                <Card key={reservation.reservation_id} className="overflow-hidden">
+                    <CardContent className="p-6">
+                        <div className="flex justify-between items-start">
+                            <div className="space-y-1">
+                                <div className="flex items-center">
+                                    <Calendar className="mr-2 h-5 w-5 text-gray-500" />
+                                    <h3 className="font-semibold">
+                                        {format(new Date(reservation.start_timestamp), 'MMM dd')}{' '}
+                                        <span className="text-gray-500">
+                                            of {format(new Date(reservation.start_timestamp), 'yyyy')}
+                                        </span>
+                                    </h3>
                                 </div>
+                                <div className="flex items-center text-sm text-foreground">
+                                    {format(new Date(reservation.start_timestamp), 'HH:mm')} -{' '}
+                                    {format(new Date(reservation.end_timestamp), 'HH:mm')}
+                                </div>
+                                <p className="text-sm text-muted-foreground">
+                                    Space {reservation.space_id} • ID: {reservation.reservation_id}
+                                </p>
                             </div>
-                        ))}
-                    </div>
-                )}
-            </CardContent>
-        </Card>
+                            <Button variant="ghost" size="icon" onClick={() => onDelete(reservation.reservation_id)}>
+                                <Trash2 className="h-4 w-4" />
+                            </Button>
+                        </div>
+                    </CardContent>
+                </Card>
+            ))}
+        </div>
     );
 };
 

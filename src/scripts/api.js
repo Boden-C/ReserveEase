@@ -22,7 +22,7 @@ import { validateUser } from './auth.js';
  * @throws {Error} If there is an issue with the request.
  */
 export async function request(url, options = {}, auth = false) {
-    url = `${import.meta.env.VITE_API_URL}${url}`;
+    url = `${import.meta.env.VITE_API_URL}/api${url}`;
     options.headers = {
         ...options.headers,
         Accept: 'application/json',

@@ -6,50 +6,39 @@ import { ThemeProvider } from '@/components/ThemeProvider';
 import DashboardPage from './pages/DashboardPage';
 import Signin from './pages/SigninPage';
 import SignUp from './pages/SignupPage';
-import { NavBar } from './components/NavBar';
 
 function App() {
     return (
-        <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
-            <AuthProvider>
-                <Router>
-                    {/* Navbar displayed for all routes except SignIn and SignUp */}
-                    <Routes>
-                        <Route
-                            path="*"
-                            element={
-                                <>
-                                    {window.location.pathname !== '/signin' &&
-                                        window.location.pathname !== '/signup' && <NavBar />}
-                                    <Routes>
-                                        {/* Public Routes */}
-                                        <Route path="/" element={<Navigate to="/signup" />} />
-                                        <Route path="/signup" element={<SignUp />} />
-                                        <Route path="/signin" element={<Signin />} />
+        <div className="min-h-screen h-full">
+            <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
+                <AuthProvider>
+                    <Router>
+                        <Routes>
+                            {/* Public Routes */}
+                            <Route path="/" element={<Navigate to="/signup" />} />
+                            <Route path="/signup" element={<SignUp />} />
+                            <Route path="/signin" element={<Signin />} />
 
-                                        {/* Private Routes */}
-                                        <Route
-                                            path="/dashboard"
-                                            element={
-                                                <PrivateRoute>
-                                                    <DashboardPage />
-                                                </PrivateRoute>
-                                            }
-                                        />
+                            {/* Private Routes */}
+                            <Route
+                                path="/dashboard"
+                                element={
+                                    <PrivateRoute>
+                                        <DashboardPage />
+                                    </PrivateRoute>
+                                }
+                            />
 
-                                        {/* Test Route */}
-                                        <Route path="/test" element={<Signin />} />
+                            {/* Test Route */}
+                            <Route path="/test" element={<h1>404: Not Found</h1>} />
 
-                                        {/* 404 Route */}
-                                        <Route path="*" element={<h1>404: Not Found</h1>} />
-                                    </Routes>
-                                </>
-                            }
-                        />
-                    </Routes>
-                </Router>
-            </AuthProvider>
-        </ThemeProvider>
+                            {/* 404 Route */}
+                            <Route path="*" element={<h1>404: Not Found</h1>} />
+                        </Routes>
+                    </Router>
+                </AuthProvider>
+            </ThemeProvider>
+        </div>
     );
 }
 

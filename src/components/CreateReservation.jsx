@@ -13,7 +13,7 @@ import TimePicker from './ui/time-picker/time-picker';
  * @param {(reservation: { space_id: string, start_timestamp: Date, end_timestamp: Date }) => Promise<string>} props.onSubmit - Callback when form is submitted
  * @param {boolean} [props.isLoading] - Whether the form is in a loading state
  */
-const AddReservation = ({ onSubmit, isLoading }) => {
+const CreateReservation = ({ onSubmit, isLoading }) => {
     const [spaceId, setSpaceId] = useState('');
     const [date, setDate] = useState(null);
     const [startTime, setStartTime] = useState('');
@@ -171,4 +171,4 @@ const AddReservation = ({ onSubmit, isLoading }) => {
     );
 };
 
-export default AddReservation;
+export default CreateReservation;
