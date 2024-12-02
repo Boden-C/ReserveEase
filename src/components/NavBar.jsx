@@ -3,13 +3,16 @@ import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { Menu } from 'lucide-react';
 import { useAuth } from './AuthContext';
+import { useState } from 'react';
+import FutureDateTimePicker from '@/components/FutureDateTimePicker';
 
 /**
- * Navigation bar component with theme switching and authentication
+ * Navigation bar component with theme switching, datetime picker, and authentication
  */
 export function NavBar() {
     const navigate = useNavigate();
     const { signout } = useAuth();
+    const [selectedDate, setSelectedDate] = useState();
 
     const handleSignOut = async () => {
         try {
@@ -25,9 +28,10 @@ export function NavBar() {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between h-16">
                     <div className="flex items-center">
-                        <Link to="/" className="flex-shrink-0 flex items-center">
+                        <Link to="/" className="flex-shrink-0 flex items-center mr-5">
                             <span className="text-2xl font-bold text-foreground">ReserveEase</span>
                         </Link>
+                        <FutureDateTimePicker value={selectedDate} onChange={setSelectedDate} className="w-[280px]" />
                     </div>
                     <div className="hidden sm:ml-6 sm:flex sm:items-center space-x-4">
                         <Button variant="ghost" onClick={handleSignOut}>
@@ -44,7 +48,9 @@ export function NavBar() {
             </div>
             <div className="sm:hidden">
                 <div className="pt-2 pb-3 space-y-1">
-                    <div className="px-3"></div>
+                    <div className="px-3">
+                        <FutureDateTimePicker value={selectedDate} onChange={setSelectedDate} className="w-full mb-2" />
+                    </div>
                     <Button
                         variant="ghost"
                         className="block w-full text-left px-3 py-2 text-base font-medium"

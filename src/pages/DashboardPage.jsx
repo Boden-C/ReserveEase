@@ -4,6 +4,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { NavBar } from '../components/NavBar';
 import RightSide from '../components/RightSide';
+import CampusMap from '../components/CampusMap';
 
 /**
  * Error Fallback component for displaying errors
@@ -23,36 +24,16 @@ const ErrorFallback = ({ error, resetErrorBoundary }) => (
 const ReservationsPage = () => {
     const [selectedSpace, setSelectedSpace] = useState(null);
 
-    const handleSpaceClick = () => {
-        // Simulate selecting a space with ID "A1"
-        setSelectedSpace(selectedSpace ? null : "A1");
-    };
-
     return (
         <div className="flex flex-col h-screen">
-            {/* Navigation Bar */}
             <NavBar />
-
-            {/* Content area - will take remaining height */}
             <div className="flex flex-1 overflow-hidden">
-                {/* Main content area */}
-                <div className="flex-1 p-4 overflow-auto">
-                    <Button 
-                        className="w-64"
-                        variant={selectedSpace ? "destructive" : "default"}
-                        onClick={handleSpaceClick}
-                    >
-                        {selectedSpace ? "Deselect Space A1" : "Select Space A1"}
-                    </Button>
+                <div className="flex-1">
+                    <CampusMap selectedSpace={selectedSpace} onSpaceSelect={setSelectedSpace} />
                 </div>
-
-                {/* Right side panel */}
-                <div className="w-[480px] border-l bg-muted/10 overflow-auto">
-                    <ErrorBoundary 
-                        FallbackComponent={ErrorFallback}
-                        onReset={() => setSelectedSpace(null)}
-                    >
-                        <RightSide selectedSpace={selectedSpace} />
+                <div className="w-[480px] border-l bg-muted/10">
+                    <ErrorBoundary FallbackComponent={ErrorFallback} onReset={() => setSelectedSpace(null)}>
+                        <RightSide selectedSpace={selectedSpace} onSpaceChange={setSelectedSpace} />
                     </ErrorBoundary>
                 </div>
             </div>

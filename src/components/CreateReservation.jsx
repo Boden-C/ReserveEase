@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import DatePicker from './date-picker';
@@ -13,13 +12,11 @@ import TimePicker from './ui/time-picker/time-picker';
  * @param {(reservation: { space_id: string, start_timestamp: Date, end_timestamp: Date }) => Promise<string>} props.onSubmit - Callback when form is submitted
  * @param {boolean} [props.isLoading] - Whether the form is in a loading state
  */
-const CreateReservation = ({ onSubmit, isLoading }) => {
-    const [spaceId, setSpaceId] = useState('');
+const CreateReservation = ({ onSubmit, isLoading, selectedSpace }) => {
     const [date, setDate] = useState(null);
     const [startTime, setStartTime] = useState('');
     const [endTime, setEndTime] = useState('');
     const [errors, setErrors] = useState({
-        spaceId: null,
         date: null,
         startTime: null,
         endTime: null,
@@ -27,12 +24,10 @@ const CreateReservation = ({ onSubmit, isLoading }) => {
     });
 
     const resetForm = () => {
-        setSpaceId('');
         setDate(null);
         setStartTime('');
         setEndTime('');
         setErrors({
-            spaceId: null,
             date: null,
             startTime: null,
             endTime: null,
@@ -45,7 +40,6 @@ const CreateReservation = ({ onSubmit, isLoading }) => {
 
         // Reset all errors
         setErrors({
-            spaceId: null,
             date: null,
             startTime: null,
             endTime: null,
@@ -55,9 +49,6 @@ const CreateReservation = ({ onSubmit, isLoading }) => {
         // Validate individual fields
         const newErrors = {};
 
-        if (!spaceId?.trim()) {
-            newErrors.spaceId = 'Please enter a space ID';
-        }
         if (!date) {
             newErrors.date = 'Please select a date';
         }
@@ -66,12 +57,6 @@ const CreateReservation = ({ onSubmit, isLoading }) => {
         }
         if (!endTime) {
             newErrors.endTime = 'Please select an end time';
-        }
-
-        // If we have any field errors, display them and stop
-        if (Object.keys(newErrors).length > 0) {
-            setErrors({ ...newErrors });
-            return;
         }
 
         // Create Date objects for the timestamps
@@ -86,6 +71,13 @@ const CreateReservation = ({ onSubmit, isLoading }) => {
         const endTimestamp = new Date(date);
         endTimestamp.setHours(endHours, endMinutes, 0);
 
+        // TIme must be in 15-minute increments
+        if (startMinutes % 15 !== 0) {
+            newErrors.startTime = 'Time must be in 15-minute increments';
+        }
+        if (endMinutes % 15 !== 0) {
+            newErrors.endTime = 'Time must be in 15-minute increments';
+        }
         // Validate time logic
         if (startTimestamp >= endTimestamp) {
             setErrors({
@@ -95,10 +87,15 @@ const CreateReservation = ({ onSubmit, isLoading }) => {
             return;
         }
 
+        // If we have any field errors, display them and stop
+        if (Object.keys(newErrors).length > 0) {
+            setErrors({ ...newErrors });
+            return;
+        }
+
         try {
-            console.log(startTimestamp, endTimestamp);
             await onSubmit({
-                space_id: spaceId,
+                space_id: selectedSpace,
                 start_timestamp: startTimestamp,
                 end_timestamp: endTimestamp,
             });
@@ -125,18 +122,6 @@ const CreateReservation = ({ onSubmit, isLoading }) => {
                             <AlertDescription>{errors.form}</AlertDescription>
                         </Alert>
                     )}
-
-                    <div className="space-y-2">
-                        <Label htmlFor="spaceId">Space ID</Label>
-                        <Input
-                            id="spaceId"
-                            value={spaceId}
-                            onChange={(e) => setSpaceId(e.target.value)}
-                            placeholder="Enter space ID"
-                            className={errors.spaceId ? 'border-red-500' : ''}
-                        />
-                        {errors.spaceId && <p className="text-sm text-red-500">{errors.spaceId}</p>}
-                    </div>
 
                     <div className="space-y-2">
                         <Label>Date</Label>
