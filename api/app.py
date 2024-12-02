@@ -3,6 +3,7 @@ from flask import Flask, jsonify
 from flask_cors import CORS
 import firebase_admin
 from firebase_admin import credentials, firestore
+from firestore import FirestoreDB
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -16,6 +17,10 @@ db = firestore.client()
 
 from routes.authenticate import authentication_bp
 from routes.reservations import reservations_bp
+
+# Initialize Firestore
+firestore_db = FirestoreDB()
+db = firestore_db.db
 
 # Register blueprints with a URL prefix
 app.register_blueprint(authentication_bp, url_prefix='/api')
