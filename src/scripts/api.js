@@ -47,6 +47,28 @@ export async function request(url, options = {}, auth = false) {
 }
 
 /**
+ * Edits an existing parking spot.
+ * @param {string} parkingId - ID of the parking spot to edit.
+ * @param {{
+*   name?: string,
+*   location?: string,
+*   status?: string
+* }} updates - Fields to update for the parking spot.
+* @returns {Promise<{message: string}>} Success message.
+*/
+export async function editParking(parkingId, updates) {
+   const response = await request(
+       `/parking/${parkingId}`,
+       {
+           method: 'PATCH',
+           body: JSON.stringify(updates),
+       },
+       true
+   );
+   return response.json();
+}
+
+/**
  * Creates a new reservation
  * @param {{
  *   space_id: string,
