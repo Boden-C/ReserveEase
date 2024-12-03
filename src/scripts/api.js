@@ -37,7 +37,7 @@ export async function request(url, options = {}, auth = false) {
         Accept: 'application/json',
         'Content-Type': 'application/json',
     };
-    options.credentials = 'same-origin';
+    options.credentials = 'include';
 
     if (auth) {
         const idToken = await validateUser();
@@ -66,15 +66,15 @@ export async function request(url, options = {}, auth = false) {
 * @returns {Promise<{message: string}>} Success message.
 */
 export async function editParking(parkingId, updates) {
-   const response = await request(
-       `/parking/${parkingId}`,
-       {
-           method: 'PATCH',
-           body: JSON.stringify(updates),
-       },
-       true
-   );
-   return response.json();
+    const response = await request(
+        `/parking/${parkingId}`,
+        {
+            method: 'PATCH',
+            body: JSON.stringify(updates),
+        },
+        true
+    );
+    return response.json();
 }
 
 /**
