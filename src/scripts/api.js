@@ -14,6 +14,15 @@ import { validateUser } from './auth.js';
  */
 
 /**
+ * Represents a parking space
+ * @typedef {Object} ParkingSpace
+ * @property {string} space_id - Unique identifier for the parking space
+ * @property {number} x - X-coordinate of the parking space
+ * @property {number} y - Y-coordinate of the parking space
+ * @property {boolean} isAvailable - Availability status of the parking space
+ */
+
+/**
  * Makes a request to the API.
  * @param {string} url - The endpoint URL.
  * @param {object} options - Fetch options.
@@ -136,4 +145,50 @@ export async function getReservations(filters = {}) {
         method: 'GET',
     });
     return await response.json();
+}
+
+window.getParkingWithAvailabilityAt = getParkingWithAvailabilityAt;
+/**
+ * Gets parking spaces with availability information for a given date
+ * @param {Date} date - The date to check for parking availability
+ * @returns {Promise<Array<ParkingSpace>>} List of parking spaces with updated availability
+ */
+export async function getParkingWithAvailabilityAt(date) {
+    if (!(date instanceof Date)) {
+        throw new TypeError('Invalid date provided');
+    }
+
+    try {
+        // Calculate time range (rounded to nearest 15 minutes)
+        const from = new Date(date);
+        from.setMinutes(Math.floor(from.getMinutes() / 15) * 15, 0, 0);
+
+        const to = new Date(date);
+        to.setMinutes(Math.ceil(to.getMinutes() / 15) * 15, 0, 0);
+
+        // Fetch parking data
+        const parkingResponse = await request('/parking');
+        const parkingData = await parkingResponse.json();
+
+        // Fetch reservations overlapping with the calculated range
+        const reservations = await getReservations({ from, to });
+
+        // Validate reservations
+        if (!Array.isArray(reservations) || !reservations.every(res => res.space_id)) {
+            throw new Error('Failed to fetch reservations');
+        }
+
+        const reservedSpaces = new Set(reservations.map(res => res.space_id));
+        const parkingWithAvailability = Object.values(parkingData).map(parkingSpace => ({
+            space_id: parkingSpace.space_id,
+            x: parkingSpace.x,
+            y: parkingSpace.y,
+            isAvailable: !reservedSpaces.has(parkingSpace.space_id),
+        }));
+
+        return parkingWithAvailability;
+    } catch (error) {
+        console.error('Error fetching parking availability:', error);
+        throw error;
+    }
 }

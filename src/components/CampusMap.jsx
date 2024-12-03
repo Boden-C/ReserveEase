@@ -32,29 +32,22 @@ function svgToDataUrl(svgString) {
     return `data:image/svg+xml;base64,${btoa(svgString)}`;
 }
 
-const parkingSpots = {
-    A1: { x: 0.4, y: 0.5, id: 'A1', isAvailable: true },
-    A2: { x: 0.6, y: 0.3, id: 'A2', isAvailable: false },
-    A3: { x: 0.8, y: 0.7, id: 'A3', isAvailable: true },
-    A4: { x: 0.2, y: 0.2, id: 'A4', isAvailable: false },
-    A5: { x: 0.3, y: 0.8, id: 'A5', isAvailable: true },
-    A6: { x: 0.7, y: 0.4, id: 'A6', isAvailable: false },
-    A7: { x: 0.9, y: 0.9, id: 'A7', isAvailable: true },
-    A8: { x: 0.1, y: 0.6, id: 'A8', isAvailable: false },
-    A9: { x: 0.5, y: 0.1, id: 'A9', isAvailable: true },
-    A10: { x: 0.8, y: 0.2, id: 'A10', isAvailable: false },
-    A11: { x: 0.2, y: 0.9, id: 'A11', isAvailable: true },
-    A12: { x: 0.6, y: 0.6, id: 'A12', isAvailable: false },
-    A13: { x: 0.4, y: 0.2, id: 'A13', isAvailable: true },
-};
-
-export default function CampusMap({ selectedSpace, onSpaceSelect }) {
+/**
+ * Interactive campus map component
+ * @param {Object} props Component props
+ * @param {string|null} props.selectedSpace Currently selected space ID
+ * @param {(id: string) => void} props.onSpaceSelect Callback when a space is selected
+ * @param {Array<ParkingSpace>} props.parkingSpaces Array of parking spaces with availability
+ * @param {boolean} props.isLoading Loading state indicator
+ * @returns {JSX.Element} CampusMap component
+ */
+export default function CampusMap({ selectedSpace, onSpaceSelect, parkingSpaces = [], isLoading }) {
     const viewerRef = useRef(null);
     const mapRef = useRef(null);
     const overlayRefs = useRef({});
     const trackersRef = useRef({});
 
-    // Initialize viewer only once
+    // Initialize viewer only once (keeping your existing initialization code)
     useEffect(() => {
         if (!mapRef.current || viewerRef.current) return;
 
@@ -96,19 +89,16 @@ export default function CampusMap({ selectedSpace, onSpaceSelect }) {
         viewerRef.current = OpenSeadragon(options);
 
         return () => {
-            // Cleanup MouseTrackers
-            Object.values(trackersRef.current).forEach(tracker => tracker.destroy());
+            Object.values(trackersRef.current).forEach((tracker) => tracker.destroy());
             trackersRef.current = {};
-            
-            // Destroy viewer
             viewerRef.current?.destroy();
             viewerRef.current = null;
         };
-    }, []); // Empty dependency array - only run once is fine here as we're just initializing the viewer
+    }, []);
 
     // Handle marker creation and updates
     useEffect(() => {
-        if (!viewerRef.current) return;
+        if (!viewerRef.current || isLoading) return;
 
         const markerSvg = (color) => `
             <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24">
@@ -117,27 +107,26 @@ export default function CampusMap({ selectedSpace, onSpaceSelect }) {
             </svg>
         `;
 
-        // Create handleClick function that will be used by the MouseTracker
         const createClickHandler = (id) => () => {
             console.log('Marker clicked:', id);
             onSpaceSelect(id);
         };
 
         // Remove existing overlays
-        Object.keys(overlayRefs.current).forEach(id => {
+        Object.keys(overlayRefs.current).forEach((id) => {
             viewerRef.current.removeOverlay(`marker-${id}`);
         });
         overlayRefs.current = {};
 
         // Add/update markers
-        Object.entries(parkingSpots).forEach(([id, spot]) => {
+        parkingSpaces.forEach((spot) => {
             const element = document.createElement('div');
-            element.id = `marker-${id}`;
+            element.id = `marker-${spot.space_id}`;
             const color = spot.isAvailable ? '#22c55e' : '#ef4444';
             element.innerHTML = markerSvg(color);
             element.className = 'cursor-pointer transition-transform hover:scale-110';
 
-            if (selectedSpace === id) {
+            if (selectedSpace === spot.space_id) {
                 element.classList.add('scale-125');
             }
 
@@ -148,26 +137,23 @@ export default function CampusMap({ selectedSpace, onSpaceSelect }) {
                 checkResize: false,
             });
 
-            overlayRefs.current[id] = element;
+            overlayRefs.current[spot.space_id] = element;
 
-            // Remove old tracker if it exists
-            if (trackersRef.current[id]) {
-                trackersRef.current[id].destroy();
+            if (trackersRef.current[spot.space_id]) {
+                trackersRef.current[spot.space_id].destroy();
             }
 
-            // Create new tracker
-            trackersRef.current[id] = new OpenSeadragon.MouseTracker({
+            trackersRef.current[spot.space_id] = new OpenSeadragon.MouseTracker({
                 element: element,
-                clickHandler: createClickHandler(id)
+                clickHandler: createClickHandler(spot.space_id),
             });
         });
 
         return () => {
-            // Cleanup MouseTrackers when updating markers
-            Object.values(trackersRef.current).forEach(tracker => tracker.destroy());
+            Object.values(trackersRef.current).forEach((tracker) => tracker.destroy());
             trackersRef.current = {};
         };
-    }, [selectedSpace, onSpaceSelect]); // Include both dependencies
+    }, [parkingSpaces, selectedSpace, onSpaceSelect, isLoading]);
 
     return (
         <div className="h-full flex-1">

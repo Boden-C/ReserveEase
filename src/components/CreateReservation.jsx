@@ -148,7 +148,7 @@ const CreateReservation = ({ onSubmit, isLoading, selectedSpace }) => {
                     </div>
 
                     <Button type="submit" className="w-full" disabled={isLoading}>
-                        {isLoading ? 'Adding...' : 'Add Reservation'}
+                        {isLoading ? '...' : 'Add Reservation'}
                     </Button>
                 </form>
             </CardContent>

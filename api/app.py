@@ -16,10 +16,12 @@ db = firestore.client()
 
 from routes.authenticate import authentication_bp
 from routes.reservations import reservations_bp
+from routes.edit_parking import parking_bp
 
 # Register blueprints with a URL prefix
 app.register_blueprint(authentication_bp, url_prefix='/api')
 app.register_blueprint(reservations_bp, url_prefix='/api')
+app.register_blueprint(parking_bp, url_prefix='/api')
 
 @app.errorhandler(400)
 @app.errorhandler(401)
