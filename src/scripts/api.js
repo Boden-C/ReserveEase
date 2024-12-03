@@ -49,7 +49,8 @@ export async function request(url, options = {}, auth = false) {
     const response = await fetch(url, options);
     if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message);
+        console.error('API request failed:', errorData);
+        throw new Error(errorData.message || 'Failed to fetch data');
     } else {
         return response;
     }
@@ -59,12 +60,12 @@ export async function request(url, options = {}, auth = false) {
  * Edits an existing parking spot.
  * @param {string} parkingId - ID of the parking spot to edit.
  * @param {{
-*   name?: string,
-*   location?: string,
-*   status?: string
-* }} updates - Fields to update for the parking spot.
-* @returns {Promise<{message: string}>} Success message.
-*/
+ *   name?: string,
+ *   location?: string,
+ *   status?: string
+ * }} updates - Fields to update for the parking spot.
+ * @returns {Promise<{message: string}>} Success message.
+ */
 export async function editParking(parkingId, updates) {
     const response = await request(
         `/parking/${parkingId}`,
@@ -196,12 +197,12 @@ export async function getParkingWithAvailabilityAt(date) {
         const reservations = await getReservations({ from, to });
 
         // Validate reservations
-        if (!Array.isArray(reservations) || !reservations.every(res => res.space_id)) {
+        if (!Array.isArray(reservations) || !reservations.every((res) => res.space_id)) {
             throw new Error('Failed to fetch reservations');
         }
 
-        const reservedSpaces = new Set(reservations.map(res => res.space_id));
-        const parkingWithAvailability = Object.values(parkingData).map(parkingSpace => ({
+        const reservedSpaces = new Set(reservations.map((res) => res.space_id));
+        const parkingWithAvailability = Object.values(parkingData).map((parkingSpace) => ({
             space_id: parkingSpace.space_id,
             x: parkingSpace.x,
             y: parkingSpace.y,

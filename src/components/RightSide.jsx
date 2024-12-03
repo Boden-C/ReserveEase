@@ -12,7 +12,7 @@ import { useReservations } from '@/components/useReservations';
  * @returns {JSX.Element}
  * @throws {Error} Throws errors from useReservations for parent error boundary
  */
-const RightSide = ({ selectedSpace, onSpaceChange }) => {
+const RightSide = ({ selectedSpace, onSpaceChange, selectedDateTime }) => {
     const [view, setView] = useState('list');
     const [isRefreshing, setIsRefreshing] = useState(false);
     const { reservations, isFirstLoad, addReservation, removeReservation, refreshReservations } = useReservations();
@@ -44,7 +44,7 @@ const RightSide = ({ selectedSpace, onSpaceChange }) => {
             setView('list');
             await handleRefresh();
         } catch (error) {
-            throw new Error('Failed to create reservation', { cause: error });
+            throw new Error(error.message, { cause: error });
         }
     };
 
@@ -90,7 +90,12 @@ const RightSide = ({ selectedSpace, onSpaceChange }) => {
                 {view === 'list' ? (
                     <ReservationsList reservations={reservations} isFirstLoad={isFirstLoad} onDelete={handleDelete} />
                 ) : (
-                    <CreateReservation onSubmit={handleSubmit} isLoading={isFirstLoad} selectedSpace={selectedSpace} />
+                    <CreateReservation
+                        onSubmit={handleSubmit}
+                        isLoading={isFirstLoad}
+                        selectedSpace={selectedSpace}
+                        selectedDateTime={selectedDateTime}
+                    />
                 )}
             </div>
         </div>
