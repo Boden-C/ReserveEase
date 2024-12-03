@@ -27,13 +27,13 @@ import { getUserReservations, createReservation, deleteReservation } from '@/scr
 const initialState = {
     reservations: [],
     lastSuccessfulState: [],
-    isFirstLoad: true
+    isFirstLoad: true,
 };
 
 /**
  * Reducer for managing reservation state
- * @param {ReservationsState} state 
- * @param {Action} action 
+ * @param {ReservationsState} state
+ * @param {Action} action
  * @returns {ReservationsState}
  */
 const reservationsReducer = (state, action) => {
@@ -43,24 +43,24 @@ const reservationsReducer = (state, action) => {
                 ...state,
                 reservations: action.payload,
                 lastSuccessfulState: action.payload,
-                isFirstLoad: false
+                isFirstLoad: false,
             };
         case 'OPTIMISTIC_ADD':
             return {
                 ...state,
                 reservations: [...state.reservations, action.payload].sort(
                     (a, b) => new Date(a.start_timestamp) - new Date(b.start_timestamp)
-                )
+                ),
             };
         case 'OPTIMISTIC_DELETE':
             return {
                 ...state,
-                reservations: state.reservations.filter(r => r.reservation_id !== action.payload)
+                reservations: state.reservations.filter((r) => r.reservation_id !== action.payload),
             };
         case 'REVERT':
             return {
                 ...state,
-                reservations: state.lastSuccessfulState
+                reservations: state.lastSuccessfulState,
             };
         default:
             return state;
@@ -87,9 +87,7 @@ export const useReservations = () => {
     const fetchReservations = useCallback(async () => {
         try {
             const data = await getUserReservations();
-            const sortedData = data.sort(
-                (a, b) => new Date(a.start_timestamp) - new Date(b.start_timestamp)
-            );
+            const sortedData = data.sort((a, b) => new Date(a.start_timestamp) - new Date(b.start_timestamp));
             dispatch({ type: 'SET_RESERVATIONS', payload: sortedData });
         } catch (error) {
             dispatch({ type: 'REVERT' });
@@ -121,6 +119,7 @@ export const useReservations = () => {
             await fetchReservations();
             return response.id;
         } catch (error) {
+            console.log(error);
             dispatch({ type: 'REVERT' });
             throw new Error(`Failed to create reservation: ${error.message}`);
         }

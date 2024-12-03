@@ -1,5 +1,19 @@
 # Backend Function Documentaion
 
+## api/app.py
+
+`api.app.after_request(response)`
+
+```
+
+```
+
+`api.app.handle_error(error)`
+
+```
+
+```
+
 ## api/exceptions.py
 
 `api.exceptions.__init__(self, message: str, code: int)`
@@ -67,9 +81,41 @@ Decorator that verifies Firebase JWT tokens from the Authorization header.
 
 ```
 
+## api/database/firestore.py
+
+`api.database.firestore.initialize_firestore()`
+
+```
+Initializes Firestore with the Firebase Admin credentials.
+
+    Returns:
+        firestore.Client: The Firestore client instance.
+
+    Raises:
+        ClientError: If initialization fails due to missing credentials or other issues.
+```
+
+`api.database.firestore.__init__(self)`
+
+```
+
+```
+
+`api.database.firestore.get_collection(self, collection_name: str)`
+
+```
+Returns a reference to the specified Firestore collection.
+
+    Args:
+        collection_name (str): Name of the Firestore collection.
+
+    Returns:
+        firestore.CollectionReference: Reference to the Firestore collection.
+```
+
 ## api/database/reservations.py
 
-`api.database.reservations.create_reservation(user_id: str, space_id: str, start_timestamp: datetime, end_timestamp: datetime) -> str`
+`api.database.reservations.__create_reservation(user_id: str, space_id: str, start_timestamp: datetime, end_timestamp: datetime) -> str`
 
 ```
 Create a new reservation in Firestore.
@@ -144,6 +190,29 @@ Validates reservation times and creates a new reservation in Firestore.
 
 ```
 Route to check if user is valid.
+```
+
+## api/routes/edit_parking.py
+
+`api.routes.edit_parking.get_parking_spots()`
+
+```
+Fetch all parking spots.
+    Authentication is required to access this route.
+```
+
+`api.routes.edit_parking.create_parking_spot()`
+
+```
+Create a new parking spot.
+    Authentication is required to access this route.
+```
+
+`api.routes.edit_parking.delete_parking_spot(spot_id)`
+
+```
+Delete a parking spot by ID.
+    Authentication is required to access this route.
 ```
 
 ## api/routes/reservations.py

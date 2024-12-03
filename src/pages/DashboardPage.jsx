@@ -36,10 +36,10 @@ const ReservationsPage = () => {
     useEffect(() => {
         async function fetchParkingData() {
             if (!selectedDateTime) return;
-            
+
             setIsLoading(true);
             setError(null);
-            
+
             try {
                 const spaces = await getParkingWithAvailabilityAt(selectedDateTime);
                 setParkingSpaces(spaces);
@@ -56,21 +56,18 @@ const ReservationsPage = () => {
 
     return (
         <div className="flex flex-col h-screen">
-            <NavBar 
-                selectedDateTime={selectedDateTime}
-                onDateTimeChange={setSelectedDateTime}
-            />
+            <NavBar selectedDateTime={selectedDateTime} onDateTimeChange={setSelectedDateTime} />
             <div className="flex flex-1 overflow-hidden">
                 <div className="flex-1">
-                    <ErrorBoundary 
-                        FallbackComponent={ErrorFallback} 
+                    <ErrorBoundary
+                        FallbackComponent={ErrorFallback}
                         onReset={() => {
                             setError(null);
                             setSelectedSpace(null);
                         }}
                     >
-                        <CampusMap 
-                            selectedSpace={selectedSpace} 
+                        <CampusMap
+                            selectedSpace={selectedSpace}
                             onSpaceSelect={setSelectedSpace}
                             parkingSpaces={parkingSpaces}
                             isLoading={isLoading}
@@ -78,12 +75,9 @@ const ReservationsPage = () => {
                     </ErrorBoundary>
                 </div>
                 <div className="w-[480px] border-l bg-muted/10">
-                    <ErrorBoundary 
-                        FallbackComponent={ErrorFallback} 
-                        onReset={() => setSelectedSpace(null)}
-                    >
-                        <RightSide 
-                            selectedSpace={selectedSpace} 
+                    <ErrorBoundary FallbackComponent={ErrorFallback} onReset={() => setSelectedSpace(null)}>
+                        <RightSide
+                            selectedSpace={selectedSpace}
                             onSpaceChange={setSelectedSpace}
                             selectedDateTime={selectedDateTime}
                             parkingSpaces={parkingSpaces}
