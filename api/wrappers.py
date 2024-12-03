@@ -5,6 +5,12 @@ from app import app
 from typing import Callable, Dict, Tuple, Union, Any
 from functools import wraps
 from firebase_admin import auth
+from firestore import FirestoreDB  # Import FirestoreDB wrapper
+
+# Initialize FirestoreDB for use in wrappers
+firestore_db = FirestoreDB()
+db = firestore_db.db
+
 
 def verify_token(f: Callable) -> Callable:
     """
