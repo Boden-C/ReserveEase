@@ -1,6 +1,6 @@
 // src/scripts/useReservations.js
-import { useReducer, useEffect, useCallback } from 'react';
-import { getUserReservations, createReservation, deleteReservation } from '@/scripts/api.js';
+import { useReducer, useEffect, useCallback, useState } from 'react';
+import { getUserReservations, createReservation, deleteReservation, getReservations } from '@/scripts/api.js';
 
 /**
  * @typedef {Object} Reservation
@@ -143,5 +143,48 @@ export const useReservations = () => {
         addReservation,
         removeReservation,
         refreshReservations: fetchReservations,
+    };
+};
+
+/**
+ * Hook to fetch all reservations for a specific space
+ * @param {string} spaceId - The ID of the space to fetch reservations for
+ * @returns {{
+ *   allReservations: Array<import('./useReservations').Reservation>,
+ *   isLoading: boolean,
+ *   error: Error | null,
+ *   refresh: () => Promise<void>
+ * }}
+ */
+export const useAllReservations = (spaceId) => {
+    const [allReservations, setAllReservations] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    const fetchAllReservations = useCallback(async () => {
+        try {
+            setIsLoading(true);
+            setError(null);
+            const data = await getReservations({
+                space_id: spaceId,
+                from: new Date(new Date().setHours(0, 0, 0, 0)), // From start of today
+            });
+            setAllReservations(data.sort((a, b) => new Date(a.start_timestamp) - new Date(b.start_timestamp)));
+        } catch (err) {
+            setError(err);
+        } finally {
+            setIsLoading(false);
+        }
+    }, [spaceId]);
+
+    useEffect(() => {
+        fetchAllReservations();
+    }, [fetchAllReservations]);
+
+    return {
+        allReservations,
+        isLoading,
+        error,
+        refresh: fetchAllReservations,
     };
 };

@@ -4,21 +4,20 @@ import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import TimeGrid from './TimeGrid';
 import { format } from 'date-fns';
-import { useReservations } from '@/components/useReservations';
+import { useReservations, useAllReservations } from '@/components/useReservations';
 
 const CreateReservation = ({ onSubmit, isLoading, selectedSpace, selectedDateTime }) => {
     const [error, setError] = useState(null);
     const [selection, setSelection] = useState({ start: null, end: null });
-    const { reservations, isFirstLoad } = useReservations();
+    const { isFirstLoad } = useReservations();
+    const { allReservations, isLoading: isLoadingAll } = useAllReservations(selectedSpace);
     const errorRef = useRef(null);
 
     // Convert reservations to time slots format expected by TimeGrid
-    const reservedSlots = reservations
-        .filter((res) => res.space_id === selectedSpace)
-        .map((res) => ({
-            start: new Date(res.start_timestamp),
-            end: new Date(res.end_timestamp),
-        }));
+    const reservedSlots = allReservations.map((res) => ({
+        start: new Date(res.start_timestamp),
+        end: new Date(res.end_timestamp),
+    }));
 
     const handleSelectionChange = (start, end) => {
         setError(null);
@@ -44,7 +43,7 @@ const CreateReservation = ({ onSubmit, isLoading, selectedSpace, selectedDateTim
         }
     };
 
-    if (isFirstLoad) {
+    if (isFirstLoad || isLoadingAll) {
         return <div>Loading reservations...</div>;
     }
 
