@@ -170,7 +170,6 @@ export async function getReservations(filters = {}) {
     return await response.json();
 }
 
-window.getParkingWithAvailabilityAt = getParkingWithAvailabilityAt;
 /**
  * Gets parking spaces with availability information for a given date
  * @param {Date} date - The date to check for parking availability
