@@ -1,65 +1,48 @@
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { signin, signout } from '../src/scripts/auth.js';
-import { editParking } from '../src/scripts/api.js';
+import { describe, expect, test, beforeAll, afterAll } from 'vitest';
+import { signInWithEmailAndPassword, signOut } from 'firebase/auth';
+import { auth } from '../src/scripts/firebaseConfig.js';
+import { getParkingWithAvailabilityAt } from '../src/scripts/api.js';
 
-const TEST_EMAIL = 'testuser@example.com';
-const TEST_PASSWORD = 'testpassword';
+beforeAll(async () => {
+    await signInWithEmailAndPassword(auth, 'testuser@example.com', 'testpassword');
+});
 
-describe('Edit Parking Spot API', () => {
-    const mockParkingId = 'parking_123';
-    const validUpdates = { name: 'Updated Name', status: 'available' };
-    const invalidUpdates = { name: '', status: 'unknown' };
+afterAll(async () => {
+    await signOut(auth);
+});
 
-    beforeAll(async () => {
-        // Log in the mock user before tests
-        await signin(TEST_EMAIL, TEST_PASSWORD);
+describe('Get Parking with Availability API', () => {
+    const validDate = new Date(); // Jan 1, 2099, 10:00 AM UTC
+    const invalidDate = 'not-a-date';
+
+    test('Get Parking - success', async () => {
+        const parkingSpaces = await getParkingWithAvailabilityAt(validDate);
+        expect(Array.isArray(parkingSpaces)).toBe(true);
+        expect(parkingSpaces.length).toBeGreaterThan(0); // Assuming some parking spaces are available
+        expect(parkingSpaces[0]).toHaveProperty('space_id');
+        expect(parkingSpaces[0]).toHaveProperty('x');
+        expect(parkingSpaces[0]).toHaveProperty('y');
+        expect(parkingSpaces[0]).toHaveProperty('isAvailable');
+        console.log('Parking spaces:', parkingSpaces);
     });
 
-    afterAll(async () => {
-        // Log out the mock user after tests
-        await signout();
-    });
-
-    it('should successfully edit a parking spot', async () => {
-        const result = await editParking(mockParkingId, validUpdates);
-        expect(result).toHaveProperty('message');
-        expect(result.message).toContain(`Parking spot ${mockParkingId} updated successfully.`);
-    });
-
-    it('should fail to edit a parking spot with invalid updates', async () => {
+    test('Get Parking - invalid date', async () => {
         try {
-            await editParking(mockParkingId, invalidUpdates);
+            await getParkingWithAvailabilityAt(invalidDate);
         } catch (error) {
-            console.log('EXPECTED error: invalid updates', error.message);
+            console.log('EXPECTED error: invalid date', error.message);
             expect(error).toBeTruthy();
+            expect(error.message).toContain('Invalid date provided');
         }
     });
 
-    it('should fail to edit a parking spot with invalid parking ID', async () => {
-        const invalidParkingId = 'invalid_123';
+    test('Get Parking - missing date', async () => {
         try {
-            await editParking(invalidParkingId, validUpdates);
+            await getParkingWithAvailabilityAt(); // No date provided
         } catch (error) {
-            console.log('EXPECTED error: parking spot not found', error.message);
-            expect(error.message).toContain('Parking spot not found');
-        }
-    });
-
-    it('should fail to edit a parking spot with no updates provided', async () => {
-        try {
-            await editParking(mockParkingId, {});
-        } catch (error) {
-            console.log('EXPECTED error: no updates provided', error.message);
-            expect(error.message).toContain('Invalid inputs');
-        }
-    });
-
-    it('should fail when parking ID is missing', async () => {
-        try {
-            await editParking('', validUpdates);
-        } catch (error) {
-            console.log('EXPECTED error: missing parking ID', error.message);
-            expect(error.message).toContain('Invalid inputs');
+            console.log('EXPECTED error: missing date', error.message);
+            expect(error).toBeTruthy();
+            expect(error.message).toContain('Invalid date provided');
         }
     });
 });
