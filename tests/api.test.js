@@ -19,6 +19,14 @@ describe('Reservations API', () => {
     const mockEnd = new Date(Date.UTC(2099, 0, 1, 11, 0, 0)); // Jan 1, 2099, 11:00 AM UTC
 
     let createdReservationId;
+    let userReservationsCount;
+
+    test('Get User Reservation - success', async () => {
+        const userReservations = await getUserReservations();
+        expect(Array.isArray(userReservations)).toBe(true);
+        userReservationsCount = userReservations.length;
+        console.log('User reservations:', userReservations);
+    });
 
     test('Create Reservation - success', async () => {
         const result = await createReservation({
@@ -105,7 +113,8 @@ describe('Reservations API', () => {
     test('Get User Reservations - no reservations for user', async () => {
         const userReservations = await getUserReservations();
         expect(Array.isArray(userReservations)).toBe(true);
-        expect(userReservations.length).toBe(0); // Assuming no reservations exist for this user
+        console.log('User reservations:', userReservations);
+        expect(userReservations.length).toBe(userReservationsCount); // Assuming no reservations exist for this user
     });
 
     test('Create Reservation - zero duration', async () => {

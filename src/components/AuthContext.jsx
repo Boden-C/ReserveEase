@@ -136,6 +136,7 @@ export function AuthProvider({ children }) {
         }
     };
 
+    window.signout = () => signOut(auth);
     const signout = () => signOut(auth);
 
     const value = {

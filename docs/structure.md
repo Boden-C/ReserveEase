@@ -6,11 +6,13 @@ api/
 -   config.py
 -   database/
     -   **init**.py
+    -   firestore.py
     -   reservations.py
 -   exceptions.py
 -   routes/
     -   **init**.py
     -   authenticate.py
+    -   edit_parking.py
     -   reservations.py
 -   typedef.py
 -   wrappers.py
@@ -19,14 +21,23 @@ src/
 
 -   App.jsx
 -   assets/
+    -   campus-map.png
     -   parking_bg.jpg
-    -   react.svg
     -   vite.svg
 -   components/
     -   AuthContext.jsx
+    -   CampusMap.jsx
     -   Components.jsx
+    -   CreateReservation.jsx
+    -   FutureDateTimePicker.jsx
+    -   NavBar.jsx
     -   PrivateRoute.jsx
+    -   ReservationsList.jsx
+    -   RightSide.jsx
     -   ThemeProvider.tsx
+    -   TimeGrid.jsx
+    -   date-picker.jsx
+    -   time-picker.jsx
     -   ui/
         -   alert.tsx
         -   button.tsx
@@ -41,6 +52,15 @@ src/
         -   mode-toggle.tsx
         -   popover.tsx
         -   scroll-area.tsx
+        -   select.tsx
+        -   skeleton.tsx
+        -   time-picker/
+            -   date-segment.jsx
+            -   time-field.jsx
+            -   time-picker.jsx
+    -   useReservations.jsx
+-   hooks/
+    -   use-toast.ts
 -   lib/
     -   utils.ts
 -   main.jsx
@@ -48,7 +68,6 @@ src/
     -   AuthenticationPages.jsx
     -   DashboardPage.jsx
     -   LandingPage.jsx
-    -   ReservationPage.jsx
     -   SigninPage.jsx
     -   SignupPage.jsx
 -   scripts/

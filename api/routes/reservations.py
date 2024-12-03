@@ -97,8 +97,9 @@ def create_reservation():
         }), 201
         
     except ClientError as e:
-        print(str(e))
-        abort(e.code, description=e.message)
+        return jsonify({
+            'message': e.message
+        }), e.code
         
     except Exception as e:
         traceback.print_exc()
@@ -147,8 +148,9 @@ def delete_reservation(reservation_id):
         }), 200
     
     except ClientError as e:
-        print(str(e))
-        abort(e.code, description=e.message)
+        return jsonify({
+            'message': e.message
+        }), e.code
     
     except Exception as e:
         traceback.print_exc()
@@ -185,8 +187,9 @@ def get_user_reservations():
         return Reservation.jsonify_list(reservations=reservations), 200
     
     except ClientError as e:
-        print(str(e))
-        abort(e.code, description=e.message)
+        return jsonify({
+            'message': e.message
+        }), e.code
     
     except Exception as e:
         traceback.print_exc()
@@ -267,8 +270,9 @@ def get_reservations_route():
         return Reservation.jsonify_list(reservations=reservations, restrict_user_id=True), 200
 
     except ClientError as e:
-        print(str(e))
-        abort(e.code, description=e.message)
+        return jsonify({
+            'message': e.message
+        }), e.code
 
     except Exception as e:
         traceback.print_exc()
