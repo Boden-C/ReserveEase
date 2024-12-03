@@ -7,15 +7,12 @@ const TimeGrid = ({ selectedDate, reservedSlots, onSelectionChange, selectedSpac
     const [selectionEnd, setSelectionEnd] = useState(null);
     const [grid, setGrid] = useState([]);
 
+    // Handle grid updates
     useEffect(() => {
         const slots = [];
         const baseDate = new Date(selectedDate);
         baseDate.setHours(0, 0, 0, 0);
         const now = new Date();
-
-        // Find the current time slot
-        const currentMinutes = now.getHours() * 60 + now.getMinutes();
-        const currentSlotIndex = Math.floor(currentMinutes / 15);
 
         for (let i = 0; i < 96; i++) {
             const slotStart = new Date(baseDate);
@@ -35,14 +32,7 @@ const TimeGrid = ({ selectedDate, reservedSlots, onSelectionChange, selectedSpac
             });
         }
         setGrid(slots);
-
-        // Auto-select current time slot if it's available
-        if (currentSlotIndex < slots.length && !slots[currentSlotIndex].isReserved) {
-            setSelectionStart(slots[currentSlotIndex].start);
-            setSelectionEnd(slots[currentSlotIndex].end);
-            onSelectionChange(slots[currentSlotIndex].start, slots[currentSlotIndex].end);
-        }
-    }, [selectedDate, reservedSlots, onSelectionChange, selectedSpace]);
+    }, [selectedDate, reservedSlots]);
 
     const handleMouseDown = (slot) => {
         if (slot.isReserved) return;
@@ -67,11 +57,11 @@ const TimeGrid = ({ selectedDate, reservedSlots, onSelectionChange, selectedSpac
         }
     };
 
-    const handleClearSelection = useCallback(() => {
+    function handleClearSelection() {
         setSelectionStart(null);
         setSelectionEnd(null);
         onSelectionChange(null, null);
-    }, [onSelectionChange]);
+    }
 
     useEffect(() => {
         handleClearSelection();

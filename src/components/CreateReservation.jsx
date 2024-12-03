@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -10,6 +10,7 @@ const CreateReservation = ({ onSubmit, isLoading, selectedSpace, selectedDateTim
     const [error, setError] = useState(null);
     const [selection, setSelection] = useState({ start: null, end: null });
     const { reservations, isFirstLoad } = useReservations();
+    const errorRef = useRef(null);
 
     // Convert reservations to time slots format expected by TimeGrid
     const reservedSlots = reservations
@@ -39,6 +40,7 @@ const CreateReservation = ({ onSubmit, isLoading, selectedSpace, selectedDateTim
             setSelection({ start: null, end: null });
         } catch (err) {
             setError(err.message);
+            errorRef.current?.scrollIntoView({ behavior: 'smooth' });
         }
     };
 
@@ -52,11 +54,14 @@ const CreateReservation = ({ onSubmit, isLoading, selectedSpace, selectedDateTim
                 <CardTitle>Add Reservation for {format(selectedDateTime, 'MMMM d, yyyy')}</CardTitle>
             </CardHeader>
             <CardContent>
-                {error && (
-                    <Alert variant="destructive" className="mb-4">
-                        <AlertDescription>{error}</AlertDescription>
-                    </Alert>
-                )}
+                <div ref={errorRef}>
+                    {' '}
+                    {error && (
+                        <Alert variant="destructive" className="mb-4">
+                            <AlertDescription>{error}</AlertDescription>
+                        </Alert>
+                    )}
+                </div>
 
                 <TimeGrid
                     selectedDate={selectedDateTime || new Date()}
