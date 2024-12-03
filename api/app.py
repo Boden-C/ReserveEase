@@ -29,6 +29,19 @@ app.register_blueprint(authentication_bp, url_prefix='/api')
 app.register_blueprint(reservations_bp, url_prefix='/api')
 app.register_blueprint(parking_bp, url_prefix='/api')
 
+@app.after_request
+def after_request(response):
+    # CORS should already handle this, but for some reason it sometimes doesn't
+    if 'Access-Control-Allow-Origin' not in response.headers:
+        response.headers['Access-Control-Allow-Origin'] = 'http://localhost:5173'
+    if 'Access-Control-Allow-Headers' not in response.headers:
+        response.headers['Access-Control-Allow-Headers'] = 'Content-Type,Authorization'
+    if 'Access-Control-Allow-Methods' not in response.headers:
+        response.headers['Access-Control-Allow-Methods'] = 'GET,POST,PUT,DELETE,OPTIONS'
+    if 'Access-Control-Allow-Credentials' not in response.headers:
+        response.headers['Access-Control-Allow-Credentials'] = 'true'
+    return response
+
 @app.errorhandler(400)
 @app.errorhandler(401)
 @app.errorhandler(403)
