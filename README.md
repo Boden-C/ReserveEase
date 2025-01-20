@@ -1,18 +1,36 @@
 <div align="center">
+   <img src="https://github.com/user-attachments/assets/c5e2a7c2-1522-4489-8ff0-d644bed59956">
    <h1>ReserveEase</h1>
-   <a href="./LICENSE">
-      <img src="https://img.shields.io/badge/License-MIT-green?style=flat-square" alt="License">
-   </a>
-   <a href="../../releases">
-      <img src="https://img.shields.io/badge/Version-b0.1-green?style=flat-square" alt="Version">
-   </a>
-   <a href="../../wiki">
-      <img src="https://img.shields.io/badge/Wiki-WIP-red?style=flat-square" alt="Version">
-   </a>
+   <a href="./LICENSE"><img src="https://img.shields.io/badge/License-MIT-green?style=flat-square" alt="License"></a>
+   <a href="../../releases"><img src="https://img.shields.io/badge/Version-b0.1-green?style=flat-square" alt="Version"></a>
+   <a href="../../wiki"><img src="https://img.shields.io/badge/Wiki-WIP-red?style=flat-square" alt="Version"></a>
    <br>
-   TS/JS Vite React Flask Firebase Firestore Shadcn Parking Reservation Project
 </div>
 <br>
+
+## Description
+**ReserveEase** is a transformative reservation platform tailored specifically for parking management in modern, fast-paced environments. Designed to tackle urban mobility challenges, ReserveEase combines state-of-the-art technology with an intuitive user experience to deliver a platform that’s fast, scalable, and reliable.  
+
+## Built on Cutting-Edge Technology  
+ReserveEase harnesses the power of:  
+- **TypeScript** and **JavaScript** for robust, maintainable code.  
+- **Vite** to supercharge development speed and application performance.  
+- **React** and **Shadcn** for modern, accessible, and adaptive designs, delivering a frictionless experience across devices.  
+- **Flask** and **Firebase Firestore** for seamless backend capabilities, offering real-time synchronization of data like parking space availability, reservations, and user preferences.  
+
+## Features  
+### User-Centric Functionality  
+- **Real-time availability tracking** with Firestore for accurate, up-to-date parking inventories.  
+- **Smart reservation algorithms** to optimize parking spot discovery and allocation.  
+- **Mobile-first design** principles for seamless on-the-go reservations and management.  
+
+### Operator-Friendly Tools  
+- **Scalable architecture** built to handle high-traffic demand without performance bottlenecks.  
+- **Customizable UI and APIs** for parking lot operators to manage facilities effortlessly.  
+
+## Why ReserveEase?  
+ReserveEase is not just a reservation tool—it’s a platform designed to enhance urban living by optimizing how parking resources are utilized. From commuters seeking hassle-free parking to businesses aiming to streamline operations, ReserveEase is setting a new benchmark for reservation technology.  
+
 
 ## Installation
 
@@ -29,7 +47,7 @@ If you want to stay updated, you can clone the repository.
 1. If you have not already, install [Git](https://git-scm.com/)
 2. Clone the repository by running the following command in terminal:
    ```bash
-   git clone https://github.com/ChrisChigg/ReserveEase.git
+   git clone https://github.com/Boden-C/ReserveEase.git
    ```
 3. To update, pull from the repository by this command:
    ```bash
