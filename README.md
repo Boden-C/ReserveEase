@@ -9,7 +9,7 @@
 <br>
 
 ## Description
-**ReserveEase** is a transformative reservation platform tailored specifically for parking management in modern, fast-paced environments. Designed to tackle urban mobility challenges, ReserveEase combines state-of-the-art technology with an intuitive user experience to deliver a platform that’s fast, scalable, and reliable.  
+**ReserveEase** is an all-purpose reservation platform created initially for parking management in modern, fast-paced environments. It is meant to be a reimplementation using newer technology and fast, scalable, and reliable practices for an intuitive user experience. Read below for the technologies chosen and used.
 
 ## Technologies Used  
 ReserveEase is intentionally built with modern frameworks:  
